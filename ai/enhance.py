@@ -4,8 +4,6 @@ import sys
 import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import List, Dict
-from queue import Queue
-from threading import Lock
 # INSERT_YOUR_CODE
 import requests
 
@@ -13,7 +11,6 @@ import dotenv
 import argparse
 from tqdm import tqdm
 
-import langchain_core.exceptions
 from langchain_openai import ChatOpenAI
 from langchain.prompts import (
     ChatPromptTemplate,
@@ -26,6 +23,17 @@ if os.path.exists('.env'):
     dotenv.load_dotenv()
 template = open("template.txt", "r").read()
 system = open("system.txt", "r").read()
+json_output_instruction = """
+Return only one valid JSON object with exactly these string fields:
+{{
+  "tldr": "...",
+  "motivation": "...",
+  "method": "...",
+  "result": "...",
+  "conclusion": "..."
+}}
+Do not wrap the JSON in Markdown fences. Do not add any text before or after the JSON.
+"""
 
 def parse_args():
     """解析命令行参数"""
@@ -125,30 +133,12 @@ def process_single_item(chain, item: Dict, language: str) -> Dict:
     }
     
     try:
-        response: Structure = chain.invoke({
+        response = chain.invoke({
             "language": language,
             "content": item['summary']
         })
-        item['AI'] = response.model_dump()
-    except langchain_core.exceptions.OutputParserException as e:
-        # 尝试从错误信息中提取 JSON 字符串并修复
-        error_msg = str(e)
-        partial_data = {}
-        
-        if "Function Structure arguments:" in error_msg:
-            try:
-                # 提取 JSON 字符串
-                json_str = error_msg.split("Function Structure arguments:", 1)[1].strip().split('are not valid JSON')[0].strip()
-                # 预处理 LaTeX 数学符号 - 使用四个反斜杠来确保正确转义
-                json_str = json_str.replace('\\', '\\\\')
-                # 尝试解析修复后的 JSON
-                partial_data = json.loads(json_str)
-            except Exception as json_e:
-                print(f"Failed to parse JSON for {item.get('id', 'unknown')}: {json_e}", file=sys.stderr)
-        
-        # Merge partial data with defaults to ensure all fields exist
-        item['AI'] = {**default_ai_fields, **partial_data}
-        print(f"Using partial AI data for {item.get('id', 'unknown')}: {list(partial_data.keys())}", file=sys.stderr)
+        content = response.content if hasattr(response, "content") else str(response)
+        item['AI'] = parse_ai_response(content, default_ai_fields, item.get('id', 'unknown'))
     except Exception as e:
         # Catch any other exceptions and provide default values
         print(f"Unexpected error for {item.get('id', 'unknown')}: {e}", file=sys.stderr)
@@ -165,13 +155,44 @@ def process_single_item(chain, item: Dict, language: str) -> Dict:
             return None
     return item
 
+def parse_ai_response(content: str, default_ai_fields: Dict, paper_id: str) -> Dict:
+    """Parse a JSON object from a normal chat completion response."""
+    content = content.strip()
+    if content.startswith("```"):
+        content = re.sub(r"^```(?:json)?\s*", "", content)
+        content = re.sub(r"\s*```$", "", content)
+
+    try:
+        parsed = json.loads(content)
+    except json.JSONDecodeError:
+        match = re.search(r"\{.*\}", content, re.DOTALL)
+        if not match:
+            print(f"Failed to find JSON in AI response for {paper_id}", file=sys.stderr)
+            return default_ai_fields
+        try:
+            parsed = json.loads(match.group(0))
+        except json.JSONDecodeError as e:
+            print(f"Failed to parse JSON for {paper_id}: {e}", file=sys.stderr)
+            return default_ai_fields
+
+    if not isinstance(parsed, dict):
+        print(f"AI response for {paper_id} is not a JSON object", file=sys.stderr)
+        return default_ai_fields
+
+    try:
+        return Structure.model_validate({**default_ai_fields, **parsed}).model_dump()
+    except Exception as e:
+        print(f"Failed to validate AI response for {paper_id}: {e}", file=sys.stderr)
+        return {**default_ai_fields, **parsed}
+
 def process_all_items(data: List[Dict], model_name: str, language: str, max_workers: int) -> List[Dict]:
     """并行处理所有数据项"""
-    llm = ChatOpenAI(model=model_name).with_structured_output(Structure, method="function_calling")
-    print('Connect to:', model_name, file=sys.stderr)
+    base_url = os.environ.get("OPENAI_BASE_URL") or os.environ.get("OPENAI_API_BASE")
+    llm = ChatOpenAI(model=model_name, base_url=base_url)
+    print('Connect to:', model_name, 'base_url:', base_url or 'default', file=sys.stderr)
     
     prompt_template = ChatPromptTemplate.from_messages([
-        SystemMessagePromptTemplate.from_template(system),
+        SystemMessagePromptTemplate.from_template(system + json_output_instruction),
         HumanMessagePromptTemplate.from_template(template=template)
     ])
 
@@ -212,7 +233,7 @@ def process_all_items(data: List[Dict], model_name: str, language: str, max_work
 
 def main():
     args = parse_args()
-    model_name = os.environ.get("MODEL_NAME", 'deepseek-chat')
+    model_name = os.environ.get("MODEL_NAME", 'GLM-5.1')
     language = os.environ.get("LANGUAGE", 'Chinese')
 
     # 检查并删除目标文件
