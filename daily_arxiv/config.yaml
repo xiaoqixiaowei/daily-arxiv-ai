@@ -6,4 +6,4 @@ arxiv:
     - cs.AI
 
 llm:
-  model_name: 'deepseek-chat'  # 使用的LLM模型
+  model_name: 'GLM-5.1'  # 使用的LLM模型

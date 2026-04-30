@@ -30,10 +30,10 @@ if [ -z "$OPENAI_API_KEY" ]; then
     echo "   export OPENAI_API_KEY=\"your-api-key-here\""
     echo ""
     echo "🔧 可选变量 / Optional variables:"
-    echo "   export OPENAI_BASE_URL=\"https://api.deepseek.com\"    # API基础URL / API base URL"
+    echo "   export OPENAI_BASE_URL=\"https://models.sjtu.edu.cn/api/v1\"  # API基础URL / API base URL"
     echo "   export LANGUAGE=\"Chinese\"                           # 语言设置 / Language setting"
     echo "   export CATEGORIES=\"cs.CV,cs.GR,cs.CL,cs.AI\"         # 关注分类 / Categories of interest"
-    echo "   export MODEL_NAME=\"deepseek-chat\"                   # 模型名称 / Model name"
+    echo "   export MODEL_NAME=\"GLM-5.1\"                         # 模型名称 / Model name"
     echo ""
     echo "💡 设置后重新运行此脚本即可进行完整测试 / After setting, rerun this script for complete testing"
     echo "🚀 或者继续运行部分流程（爬取+去重检查）/ Or continue with partial workflow (crawl + dedup check)"
@@ -51,8 +51,8 @@ else
     # 设置默认值 / Set default values
     export LANGUAGE="${LANGUAGE:-Chinese}"
     export CATEGORIES="${CATEGORIES:-cs.CV,cs.GR,cs.CL,cs.AI}"
-    export MODEL_NAME="${MODEL_NAME:-deepseek-chat}"
-    export OPENAI_BASE_URL="${OPENAI_BASE_URL:-https://api.deepseek.com}"
+    export MODEL_NAME="${MODEL_NAME:-GLM-5.1}"
+    export OPENAI_BASE_URL="${OPENAI_BASE_URL:-https://models.sjtu.edu.cn/api/v1}"
     
     echo "🔧 当前配置 / Current configuration:"
     echo "   LANGUAGE: $LANGUAGE"

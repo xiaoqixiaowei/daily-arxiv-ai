@@ -17,7 +17,7 @@ This innovative tool transforms how you stay updated with arXiv papers by combin
 - Completely free to deploy and use
 
 🤖 **Smart AI Summarization**
-- Daily paper crawling with DeepSeek-powered summaries
+- Daily paper crawling with OpenAI-compatible LLM summaries
 - Cost-effective: Only ~0.2 CNY per day
 
 💫 **Smart Reading Experience**
@@ -43,7 +43,7 @@ https://github.com/user-attachments/assets/b25712a4-fb8d-484f-863d-e8da6922f9d7
 
 
 # How to use
-This repo will daily crawl arXiv papers about **cs.CV, cs.GR, cs.CL and cs.AI**, and use **DeepSeek** to summarize the papers in **Chinese**.
+This repo will daily crawl arXiv papers about **cs.CV, cs.GR, cs.CL and cs.AI**, and use an OpenAI-compatible LLM such as **GLM-5.1** to summarize the papers in **Chinese**.
 If you wish to crawl other arXiv categories, use other LLMs, or other languages, please follow the instructions.
 Otherwise, you can directly use this repo in https://dw-dengwei.github.io/daily-arXiv-ai-enhanced/. Please star it if you like :)
 
@@ -57,7 +57,7 @@ Otherwise, you can directly use this repo in https://dw-dengwei.github.io/daily-
 7. Create the following repository variables:
    1. `CATEGORIES`: separate the categories with ",", such as "cs.CL, cs.CV"
    2. `LANGUAGE`: such as "Chinese" or "English"
-   3. `MODEL_NAME`: such as "deepseek-chat"
+   3. `MODEL_NAME`: such as "GLM-5.1"
    4. `EMAIL`: your email for push to GitHub
    5. `NAME`: your name for push to GitHub
 8. Go to your-own-repo -> Actions -> arXiv-daily-ai-enhanced
