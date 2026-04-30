@@ -240,13 +240,11 @@ jobs:
         git config --global user.email "${{ vars.EMAIL }}"
         git config --global user.name "${{ vars.NAME }}"
         
-        # 添加所有代码文件，但排除数据文件 / Add all code files, but exclude data files
+        # 添加所有站点文件，包括 Cloudflare Pages 需要的静态数据
+        # Add all site files, including static data needed by Cloudflare Pages
         git add js/data-config.js
         git add .github/
-        # 添加其他可能的代码变更，但排除 data/ 目录和 assets/file-list.txt
-        # Add other possible code changes, but exclude data/ directory and assets/file-list.txt
         git add -A
-        git reset -- data/* assets/file-list.txt 2>/dev/null || true
         
         # 检查是否有代码变更需要提交 / Check if there are code changes to commit
         if git diff --staged --quiet; then
