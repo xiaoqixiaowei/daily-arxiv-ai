@@ -47,6 +47,7 @@ jobs:
         export LANGUAGE="${{ vars.LANGUAGE }}"
         export CATEGORIES="${{ vars.CATEGORIES }}"
         export INCLUDE_KEYWORDS="${{ vars.INCLUDE_KEYWORDS }}"
+        export MAX_PAPERS="${{ vars.MAX_PAPERS }}"
         export MODEL_NAME="${{ vars.MODEL_NAME }}"
         
         # 使用Scrapy爬取
