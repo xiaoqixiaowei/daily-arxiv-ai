@@ -16,7 +16,7 @@ GitHub private repo
 仓库地址：
 
 ```text
-https://github.com/xiaoqixiaowei/daily-arxiv-ai
+https://github.com/<你的 GitHub 用户名>/<你的仓库名>
 ```
 
 仓库可以保持 private，不需要开启 GitHub Pages。
@@ -100,12 +100,18 @@ Value: 6.5
 
 ```text
 Name: EMAIL
-Value: 72552069+xiaoqixiaowei@users.noreply.github.com
+Value: <你的 GitHub noreply 邮箱>
 ```
 
 ```text
 Name: NAME
-Value: xiaoqixiaowei
+Value: <你的 GitHub 用户名>
+```
+
+`EMAIL` 推荐使用 GitHub noreply 邮箱，格式通常类似：
+
+```text
+<你的 GitHub 用户 ID>+<你的 GitHub 用户名>@users.noreply.github.com
 ```
 
 模型调用名参考：
@@ -186,7 +192,7 @@ Workers & Pages
   -> Create application
   -> Pages
   -> Connect to Git
-  -> 选择 GitHub 仓库 xiaoqixiaowei/daily-arxiv-ai
+  -> 选择你的 GitHub 仓库
 ```
 
 构建设置：
