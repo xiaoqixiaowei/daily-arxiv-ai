@@ -6,11 +6,20 @@
 
 # 环境变量检查和提示 / Environment variables check and prompt
 echo "=== 本地调试环境检查 / Local Debug Environment Check ==="
+
+if [ -f ".env" ]; then
+    set -a
+    source .env
+    set +a
+    echo "✅ 已加载 .env / Loaded .env"
+fi
+
 if [ -z "$TOKEN_GITHUB" ]; then
     echo "⚠️  提示：未设置 TOKEN_GITHUB / Warning: TOKEN_GITHUB not set"
     echo "可能导致 GitHub 相关功能受限 / May limit GitHub related functionalities"
-fi
+else
     echo "✅ TOKEN_GITHUB 已设置 / TOKEN_GITHUB is set"
+fi
 
 # 检查必需的环境变量 / Check required environment variables
 if [ -z "$OPENAI_API_KEY" ]; then
@@ -21,10 +30,10 @@ if [ -z "$OPENAI_API_KEY" ]; then
     echo "   export OPENAI_API_KEY=\"your-api-key-here\""
     echo ""
     echo "🔧 可选变量 / Optional variables:"
-    echo "   export OPENAI_BASE_URL=\"https://api.openai.com/v1\"  # API基础URL / API base URL"
+    echo "   export OPENAI_BASE_URL=\"https://api.deepseek.com\"    # API基础URL / API base URL"
     echo "   export LANGUAGE=\"Chinese\"                           # 语言设置 / Language setting"
-    echo "   export CATEGORIES=\"cs.CV, cs.CL\"                    # 关注分类 / Categories of interest"
-    echo "   export MODEL_NAME=\"gpt-4o-mini\"                     # 模型名称 / Model name"
+    echo "   export CATEGORIES=\"cs.CV,cs.GR,cs.CL,cs.AI\"         # 关注分类 / Categories of interest"
+    echo "   export MODEL_NAME=\"deepseek-chat\"                   # 模型名称 / Model name"
     echo ""
     echo "💡 设置后重新运行此脚本即可进行完整测试 / After setting, rerun this script for complete testing"
     echo "🚀 或者继续运行部分流程（爬取+去重检查）/ Or continue with partial workflow (crawl + dedup check)"
@@ -41,9 +50,9 @@ else
     
     # 设置默认值 / Set default values
     export LANGUAGE="${LANGUAGE:-Chinese}"
-    export CATEGORIES="${CATEGORIES:-cs.CV, cs.CL}"
-    export MODEL_NAME="${MODEL_NAME:-gpt-4o-mini}"
-    export OPENAI_BASE_URL="${OPENAI_BASE_URL:-https://api.openai.com/v1}"
+    export CATEGORIES="${CATEGORIES:-cs.CV,cs.GR,cs.CL,cs.AI}"
+    export MODEL_NAME="${MODEL_NAME:-deepseek-chat}"
+    export OPENAI_BASE_URL="${OPENAI_BASE_URL:-https://api.deepseek.com}"
     
     echo "🔧 当前配置 / Current configuration:"
     echo "   LANGUAGE: $LANGUAGE"
