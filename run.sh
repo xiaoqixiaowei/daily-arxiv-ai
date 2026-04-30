@@ -32,7 +32,8 @@ if [ -z "$OPENAI_API_KEY" ]; then
     echo "🔧 可选变量 / Optional variables:"
     echo "   export OPENAI_BASE_URL=\"https://models.sjtu.edu.cn/api/v1\"  # API基础URL / API base URL"
     echo "   export LANGUAGE=\"Chinese\"                           # 语言设置 / Language setting"
-    echo "   export CATEGORIES=\"cs.CV,cs.GR,cs.CL,cs.AI\"         # 关注分类 / Categories of interest"
+    echo "   export CATEGORIES=\"cs.CV,cs.CL,cs.AI,cs.RO,cs.GR,cs.LG\"  # 关注分类 / Categories of interest"
+    echo "   export INCLUDE_KEYWORDS=\"vlm,world model,embodied,robot,game\"  # 关键词过滤 / Keyword filter"
     echo "   export MODEL_NAME=\"glm-5.1\"                         # 模型名称 / Model name"
     echo "   export LLM_REQUEST_INTERVAL_SECONDS=\"6.5\"           # LLM请求间隔 / LLM request interval"
     echo ""
@@ -51,7 +52,8 @@ else
     
     # 设置默认值 / Set default values
     export LANGUAGE="${LANGUAGE:-Chinese}"
-    export CATEGORIES="${CATEGORIES:-cs.CV,cs.GR,cs.CL,cs.AI}"
+    export CATEGORIES="${CATEGORIES:-cs.CV,cs.CL,cs.AI,cs.RO,cs.GR,cs.LG}"
+    export INCLUDE_KEYWORDS="${INCLUDE_KEYWORDS:-vlm,vision-language,vision language,visual language,multimodal,world model,world models,video world model,embodied,embodiment,robot,robotic,robotics,manipulation,navigation,game,games,gaming,minecraft,simulation,simulator,reinforcement learning}"
     export MODEL_NAME="${MODEL_NAME:-glm-5.1}"
     export LLM_REQUEST_INTERVAL_SECONDS="${LLM_REQUEST_INTERVAL_SECONDS:-6.5}"
     export OPENAI_BASE_URL="${OPENAI_BASE_URL:-https://models.sjtu.edu.cn/api/v1}"
@@ -59,6 +61,7 @@ else
     echo "🔧 当前配置 / Current configuration:"
     echo "   LANGUAGE: $LANGUAGE"
     echo "   CATEGORIES: $CATEGORIES"
+    echo "   INCLUDE_KEYWORDS: $INCLUDE_KEYWORDS"
     echo "   MODEL_NAME: $MODEL_NAME"
     echo "   OPENAI_BASE_URL: $OPENAI_BASE_URL"
     echo "   LLM_REQUEST_INTERVAL_SECONDS: $LLM_REQUEST_INTERVAL_SECONDS"

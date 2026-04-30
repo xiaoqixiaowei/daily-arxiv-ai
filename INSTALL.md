@@ -80,7 +80,12 @@ Settings
 
 ```text
 Name: CATEGORIES
-Value: cs.CV,cs.GR,cs.CL,cs.AI
+Value: cs.CV,cs.CL,cs.AI,cs.RO,cs.GR,cs.LG
+```
+
+```text
+Name: INCLUDE_KEYWORDS
+Value: vlm,vision-language,vision language,visual language,multimodal,world model,world models,video world model,embodied,embodiment,robot,robotic,robotics,manipulation,navigation,game,games,gaming,minecraft,simulation,simulator,reinforcement learning
 ```
 
 ```text
@@ -129,6 +134,25 @@ Qwen3.5-27B: qwen 或 qwen3.5-27b
 ```text
 MODEL_NAME=glm-5.1
 ```
+
+推荐主题配置面向 VLM、世界模型、具身智能、游戏和仿真：
+
+```text
+CATEGORIES=cs.CV,cs.CL,cs.AI,cs.RO,cs.GR,cs.LG
+```
+
+这些类别覆盖：
+
+```text
+cs.CV: 视觉、多模态、VLM
+cs.CL: 语言、多模态、VLM
+cs.AI: AI 方法、智能体、规划
+cs.RO: 机器人、具身智能
+cs.GR: 图形学、游戏、仿真
+cs.LG: 机器学习、强化学习、世界模型
+```
+
+`INCLUDE_KEYWORDS` 会在标题、摘要和分类里做二次过滤，只保留命中关键词的论文。想看更多就删掉一些限制，想更窄就减少关键词。
 
 平台限制：
 
