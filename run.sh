@@ -33,7 +33,8 @@ if [ -z "$OPENAI_API_KEY" ]; then
     echo "   export OPENAI_BASE_URL=\"https://models.sjtu.edu.cn/api/v1\"  # API基础URL / API base URL"
     echo "   export LANGUAGE=\"Chinese\"                           # 语言设置 / Language setting"
     echo "   export CATEGORIES=\"cs.CV,cs.GR,cs.CL,cs.AI\"         # 关注分类 / Categories of interest"
-    echo "   export MODEL_NAME=\"GLM-5.1\"                         # 模型名称 / Model name"
+    echo "   export MODEL_NAME=\"glm-5.1\"                         # 模型名称 / Model name"
+    echo "   export LLM_REQUEST_INTERVAL_SECONDS=\"6.5\"           # LLM请求间隔 / LLM request interval"
     echo ""
     echo "💡 设置后重新运行此脚本即可进行完整测试 / After setting, rerun this script for complete testing"
     echo "🚀 或者继续运行部分流程（爬取+去重检查）/ Or continue with partial workflow (crawl + dedup check)"
@@ -51,7 +52,8 @@ else
     # 设置默认值 / Set default values
     export LANGUAGE="${LANGUAGE:-Chinese}"
     export CATEGORIES="${CATEGORIES:-cs.CV,cs.GR,cs.CL,cs.AI}"
-    export MODEL_NAME="${MODEL_NAME:-GLM-5.1}"
+    export MODEL_NAME="${MODEL_NAME:-glm-5.1}"
+    export LLM_REQUEST_INTERVAL_SECONDS="${LLM_REQUEST_INTERVAL_SECONDS:-6.5}"
     export OPENAI_BASE_URL="${OPENAI_BASE_URL:-https://models.sjtu.edu.cn/api/v1}"
     
     echo "🔧 当前配置 / Current configuration:"
@@ -59,6 +61,7 @@ else
     echo "   CATEGORIES: $CATEGORIES"
     echo "   MODEL_NAME: $MODEL_NAME"
     echo "   OPENAI_BASE_URL: $OPENAI_BASE_URL"
+    echo "   LLM_REQUEST_INTERVAL_SECONDS: $LLM_REQUEST_INTERVAL_SECONDS"
 fi
 
 echo ""

@@ -109,6 +109,7 @@ jobs:
         export OPENAI_BASE_URL=${{ secrets.OPENAI_BASE_URL }}
         export LANGUAGE="${{ vars.LANGUAGE }}"
         export MODEL_NAME="${{ vars.MODEL_NAME }}"
+        export LLM_REQUEST_INTERVAL_SECONDS="${{ vars.LLM_REQUEST_INTERVAL_SECONDS }}"
         
         python enhance.py --data ../data/${today}.jsonl
         

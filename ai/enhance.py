@@ -2,8 +2,10 @@ import os
 import json
 import sys
 import re
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import List, Dict
+from threading import Lock
 # INSERT_YOUR_CODE
 import requests
 
@@ -40,9 +42,23 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", type=str, required=True, help="jsonline data file")
     parser.add_argument("--max_workers", type=int, default=1, help="Maximum number of parallel workers")
+    parser.add_argument("--request_interval", type=float, default=None, help="Minimum seconds between LLM requests")
     return parser.parse_args()
 
-def process_single_item(chain, item: Dict, language: str) -> Dict:
+def wait_for_llm_slot(rate_lock: Lock, rate_state: Dict, request_interval: float):
+    """Keep LLM calls under provider RPM limits across worker threads."""
+    if request_interval <= 0:
+        return
+
+    with rate_lock:
+        now = time.monotonic()
+        wait_seconds = rate_state["next_request_at"] - now
+        if wait_seconds > 0:
+            time.sleep(wait_seconds)
+            now = time.monotonic()
+        rate_state["next_request_at"] = now + request_interval
+
+def process_single_item(chain, item: Dict, language: str, rate_lock: Lock, rate_state: Dict, request_interval: float) -> Dict:
     def is_sensitive(content: str) -> bool:
         """
         调用 spam.dw-dengwei.workers.dev 接口检测内容是否包含敏感词。
@@ -133,6 +149,7 @@ def process_single_item(chain, item: Dict, language: str) -> Dict:
     }
     
     try:
+        wait_for_llm_slot(rate_lock, rate_state, request_interval)
         response = chain.invoke({
             "language": language,
             "content": item['summary']
@@ -188,8 +205,9 @@ def parse_ai_response(content: str, default_ai_fields: Dict, paper_id: str) -> D
 def process_all_items(data: List[Dict], model_name: str, language: str, max_workers: int) -> List[Dict]:
     """并行处理所有数据项"""
     base_url = os.environ.get("OPENAI_BASE_URL") or os.environ.get("OPENAI_API_BASE")
+    request_interval = float(os.environ.get("LLM_REQUEST_INTERVAL_SECONDS") or "6.5")
     llm = ChatOpenAI(model=model_name, base_url=base_url)
-    print('Connect to:', model_name, 'base_url:', base_url or 'default', file=sys.stderr)
+    print('Connect to:', model_name, 'base_url:', base_url or 'default', 'request_interval:', request_interval, file=sys.stderr)
     
     prompt_template = ChatPromptTemplate.from_messages([
         SystemMessagePromptTemplate.from_template(system + json_output_instruction),
@@ -200,10 +218,12 @@ def process_all_items(data: List[Dict], model_name: str, language: str, max_work
     
     # 使用线程池并行处理
     processed_data = [None] * len(data)  # 预分配结果列表
+    rate_lock = Lock()
+    rate_state = {"next_request_at": 0.0}
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         # 提交所有任务
         future_to_idx = {
-            executor.submit(process_single_item, chain, item, language): idx
+            executor.submit(process_single_item, chain, item, language, rate_lock, rate_state, request_interval): idx
             for idx, item in enumerate(data)
         }
         
@@ -233,8 +253,10 @@ def process_all_items(data: List[Dict], model_name: str, language: str, max_work
 
 def main():
     args = parse_args()
-    model_name = os.environ.get("MODEL_NAME", 'GLM-5.1')
-    language = os.environ.get("LANGUAGE", 'Chinese')
+    model_name = os.environ.get("MODEL_NAME") or 'glm-5.1'
+    language = os.environ.get("LANGUAGE") or 'Chinese'
+    if args.request_interval is not None:
+        os.environ["LLM_REQUEST_INTERVAL_SECONDS"] = str(args.request_interval)
 
     # 检查并删除目标文件
     target_file = args.data.replace('.jsonl', f'_AI_enhanced_{language}.jsonl')
