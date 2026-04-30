@@ -1,0 +1,11 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "daily-arxiv-ai",
+  "compatibility_date": "2026-04-30",
+  "build": {
+    "command": "bash scripts/cloudflare-build.sh"
+  },
+  "assets": {
+    "directory": "./dist"
+  }
+}
