@@ -89,11 +89,6 @@ Value: vlm,vision-language,vision language,visual language,multimodal,world mode
 ```
 
 ```text
-Name: MAX_PAPERS
-Value: 20
-```
-
-```text
 Name: LANGUAGE
 Value: Chinese
 ```
@@ -158,8 +153,6 @@ cs.LG: 机器学习、强化学习、世界模型
 ```
 
 `INCLUDE_KEYWORDS` 会在标题、摘要和分类里做二次过滤，只保留命中关键词的论文。想看更多就删掉一些限制，想更窄就减少关键词。
-
-`MAX_PAPERS` 控制每天最多进入 AI 总结和网页展示的论文数。想更少可以设为 `10`，想更多可以设为 `30`。
 
 平台限制：
 
