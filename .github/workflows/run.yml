@@ -11,6 +11,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: arxiv-daily-ai-enhanced
+  cancel-in-progress: false
+
 
 jobs:
   build:
@@ -154,6 +158,20 @@ jobs:
             exit 1
         fi
         echo "Markdown转换完成 / Markdown conversion completed"
+
+    - name: Sync latest main before site update
+      if: steps.dedup_check.outputs.has_new_content == 'true'
+      run: |
+        echo "同步最新 main 并保留本次生成的数据... / Syncing latest main while preserving generated data..."
+        mkdir -p /tmp/site_update/data
+        cp -r data/* /tmp/site_update/data/ 2>/dev/null || true
+
+        git fetch origin main
+        git reset --hard origin/main
+
+        mkdir -p data assets
+        cp -r /tmp/site_update/data/* data/ 2>/dev/null || true
+        echo "main 已同步，本次数据已恢复 / Main synced and generated data restored"
         
     - name: Update file list
       if: steps.dedup_check.outputs.has_new_content == 'true'
