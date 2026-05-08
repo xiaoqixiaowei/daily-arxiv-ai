@@ -43,7 +43,7 @@ https://github.com/user-attachments/assets/b25712a4-fb8d-484f-863d-e8da6922f9d7
 
 
 # How to use
-This repo will daily crawl arXiv papers about topics such as **VLM, world models, embodied AI, robotics, games, and simulation**, then use an OpenAI-compatible LLM such as **GLM-5.1** (`glm-5.1`) to summarize the papers in **Chinese**.
+This repo will daily crawl arXiv papers about **game agents, game AI, Minecraft, video games, and game environments**, then use an OpenAI-compatible LLM such as **GLM-5.1** (`glm-5.1`) to summarize the papers in **Chinese**.
 If you wish to crawl other arXiv categories, use other LLMs, or other languages, please follow the instructions.
 Otherwise, you can directly use this repo in https://dw-dengwei.github.io/daily-arXiv-ai-enhanced/. Please star it if you like :)
 
