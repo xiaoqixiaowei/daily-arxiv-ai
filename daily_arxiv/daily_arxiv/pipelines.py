@@ -10,6 +10,24 @@ import os
 from scrapy.exceptions import DropItem
 
 
+DEFAULT_INCLUDE_KEYWORDS = [
+    "game agent",
+    "game agents",
+    "gaming agent",
+    "game ai",
+    "game-playing",
+    "game playing",
+    "minecraft",
+    "videogame",
+    "video game",
+    "video games",
+    "game environment",
+    "game environments",
+    "game benchmark",
+    "game benchmarks",
+]
+
+
 class DailyArxivPipeline:
     def __init__(self):
         self.page_size = 100
@@ -19,7 +37,7 @@ class DailyArxivPipeline:
             keyword.strip().lower()
             for keyword in include_keywords.split(",")
             if keyword.strip()
-        ]
+        ] or DEFAULT_INCLUDE_KEYWORDS
 
     def process_item(self, item: dict, spider):
         item["pdf"] = f"https://arxiv.org/pdf/{item['id']}"
@@ -33,7 +51,7 @@ class DailyArxivPipeline:
         item["categories"] = paper.categories
         item["comment"] = paper.comment
         item["summary"] = paper.summary
-        if self.include_keywords and not self.matches_include_keywords(item):
+        if not self.matches_include_keywords(item):
             raise DropItem(f"Skipped {item['id']} because it did not match INCLUDE_KEYWORDS")
         return item
 
