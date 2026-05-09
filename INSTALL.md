@@ -227,11 +227,24 @@ Build output directory: dist
 Root directory: 留空
 ```
 
+如果你创建的是 Workers 项目，并且 Cloudflare 后台显示的是 Deploy command，请使用：
+
+```text
+bash scripts/cloudflare-deploy.sh
+```
+
+这个脚本会先生成 `dist`，再执行：
+
+```text
+npx wrangler versions upload --config wrangler.jsonc --assets=./dist
+```
+
 本仓库已经包含：
 
 ```text
 wrangler.jsonc
 scripts/cloudflare-build.sh
+scripts/cloudflare-deploy.sh
 ```
 
 如果 Cloudflare 使用 `npx wrangler deploy`，也可以正常部署，因为 `wrangler.jsonc` 已经指定静态资源目录为 `dist`。
@@ -311,7 +324,19 @@ LLM_REQUEST_INTERVAL_SECONDS=7
 
 ### Cloudflare 构建失败
 
-确认：
+如果日志里出现：
+
+```text
+Missing entry-point to Worker script or to assets directory
+```
+
+说明 Cloudflare 的部署命令没有指定 Worker 入口或静态资源目录。Workers 项目请确认：
+
+```text
+Deploy command: bash scripts/cloudflare-deploy.sh
+```
+
+Pages 项目请确认：
 
 ```text
 Build command: bash scripts/cloudflare-build.sh
