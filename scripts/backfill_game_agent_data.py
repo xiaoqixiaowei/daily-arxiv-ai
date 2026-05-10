@@ -98,17 +98,12 @@ def main() -> None:
         seen.add(item["id"])
         papers.append(item)
 
-    output = f"data/{args.output_date}_AI_enhanced_Chinese.jsonl"
-    with open(output, "w", encoding="utf-8") as file:
-        for paper in papers:
-            file.write(json.dumps(paper, ensure_ascii=False) + "\n")
-
     raw_output = f"data/{args.output_date}.jsonl"
     with open(raw_output, "w", encoding="utf-8") as file:
         for paper in papers:
             file.write(json.dumps(paper, ensure_ascii=False) + "\n")
 
-    print(f"Wrote {len(papers)} papers to {output} and {raw_output}")
+    print(f"Wrote {len(papers)} raw papers to {raw_output}")
 
 
 if __name__ == "__main__":
