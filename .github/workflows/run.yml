@@ -51,7 +51,14 @@ jobs:
         export LANGUAGE="${{ vars.LANGUAGE }}"
         export CATEGORIES="${{ vars.CATEGORIES }}"
         export CATEGORIES="${CATEGORIES:-cs.CV,cs.CL,cs.AI,cs.GR,cs.LG}"
-        export INCLUDE_KEYWORDS="${{ vars.INCLUDE_KEYWORDS }}"
+        DEFAULT_INCLUDE_KEYWORDS="vision-language model,vision language model,vlm,multimodal large language model,mllm,video-language model,world model,world models,world modeling,video world model,generative world model,action-conditioned world model,embodied world model,game agent,game agents,game-playing agent,game playing agent,multimodal game agent,autonomous game agent,llm game agent,vlm game agent,game ai,game environment,game environments,game benchmark,game benchmarks,gameplay reasoning,gameplay understanding,minecraft benchmark,minecraft agent"
+        DEPRECATED_GAME_KEYWORDS="game agent,game agents,gaming agent,game ai,game-playing,game playing,minecraft,videogame,video game,video games,game environment,game environments,game benchmark,game benchmarks"
+        DEPRECATED_EXTENDED_GAME_KEYWORDS="game agent,game agents,gaming agent,game ai,game-playing,game playing,minecraft,videogame,video game,video games,game environment,game environments,game benchmark,game benchmarks,gameplay,game engine,game engines,in-game,cross-game,super mario,card games,role-playing game,video role-playing,rpg generation,endless runner game"
+        REPO_INCLUDE_KEYWORDS="${{ vars.INCLUDE_KEYWORDS }}"
+        if [ "$REPO_INCLUDE_KEYWORDS" = "$DEPRECATED_GAME_KEYWORDS" ] || [ "$REPO_INCLUDE_KEYWORDS" = "$DEPRECATED_EXTENDED_GAME_KEYWORDS" ]; then
+          REPO_INCLUDE_KEYWORDS=""
+        fi
+        export INCLUDE_KEYWORDS="${REPO_INCLUDE_KEYWORDS:-$DEFAULT_INCLUDE_KEYWORDS}"
         export MODEL_NAME="${{ vars.MODEL_NAME }}"
         
         # 使用Scrapy爬取

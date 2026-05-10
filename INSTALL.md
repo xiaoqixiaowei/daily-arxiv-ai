@@ -85,7 +85,7 @@ Value: cs.CV,cs.CL,cs.AI,cs.GR,cs.LG
 
 ```text
 Name: INCLUDE_KEYWORDS
-Value: game agent,game agents,gaming agent,game ai,game-playing,game playing,minecraft,videogame,video game,video games,game environment,game environments,game benchmark,game benchmarks
+Value: vision-language model,vision language model,vlm,multimodal large language model,mllm,video-language model,world model,world models,world modeling,video world model,generative world model,action-conditioned world model,embodied world model,game agent,game agents,game-playing agent,game playing agent,multimodal game agent,autonomous game agent,llm game agent,vlm game agent,game ai,game environment,game environments,game benchmark,game benchmarks,gameplay reasoning,gameplay understanding,minecraft benchmark,minecraft agent
 ```
 
 ```text

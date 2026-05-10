@@ -33,7 +33,7 @@ if [ -z "$OPENAI_API_KEY" ]; then
     echo "   export OPENAI_BASE_URL=\"https://models.sjtu.edu.cn/api/v1\"  # API基础URL / API base URL"
     echo "   export LANGUAGE=\"Chinese\"                           # 语言设置 / Language setting"
     echo "   export CATEGORIES=\"cs.CV,cs.CL,cs.AI,cs.GR,cs.LG\"  # 关注分类 / Categories of interest"
-    echo "   export INCLUDE_KEYWORDS=\"game agent,game agents,minecraft,video game\"  # 关键词过滤 / Keyword filter"
+    echo "   export INCLUDE_KEYWORDS=\"vision-language model,world model,game agent\"  # 关键词过滤 / Keyword filter"
     echo "   export MODEL_NAME=\"glm-5.1\"                         # 模型名称 / Model name"
     echo "   export LLM_REQUEST_INTERVAL_SECONDS=\"6.5\"           # LLM请求间隔 / LLM request interval"
     echo ""
@@ -53,7 +53,8 @@ else
     # 设置默认值 / Set default values
     export LANGUAGE="${LANGUAGE:-Chinese}"
     export CATEGORIES="${CATEGORIES:-cs.CV,cs.CL,cs.AI,cs.GR,cs.LG}"
-    export INCLUDE_KEYWORDS="${INCLUDE_KEYWORDS:-game agent,game agents,gaming agent,game ai,game-playing,game playing,minecraft,videogame,video game,video games,game environment,game environments,game benchmark,game benchmarks}"
+    DEFAULT_INCLUDE_KEYWORDS="vision-language model,vision language model,vlm,multimodal large language model,mllm,video-language model,world model,world models,world modeling,video world model,generative world model,action-conditioned world model,embodied world model,game agent,game agents,game-playing agent,game playing agent,multimodal game agent,autonomous game agent,llm game agent,vlm game agent,game ai,game environment,game environments,game benchmark,game benchmarks,gameplay reasoning,gameplay understanding,minecraft benchmark,minecraft agent"
+    export INCLUDE_KEYWORDS="${INCLUDE_KEYWORDS:-$DEFAULT_INCLUDE_KEYWORDS}"
     export MODEL_NAME="${MODEL_NAME:-glm-5.1}"
     export LLM_REQUEST_INTERVAL_SECONDS="${LLM_REQUEST_INTERVAL_SECONDS:-6.5}"
     export OPENAI_BASE_URL="${OPENAI_BASE_URL:-https://models.sjtu.edu.cn/api/v1}"
