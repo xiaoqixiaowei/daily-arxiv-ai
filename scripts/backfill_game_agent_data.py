@@ -43,12 +43,11 @@ def main() -> None:
     parser.add_argument("--max-results", type=int, default=80)
     args = parser.parse_args()
 
+    default_categories = "cs.CV,cs.CL,cs.AI,cs.GR,cs.LG"
+    category_value = os.environ.get("CATEGORIES", default_categories) or default_categories
     categories = {
         category.strip()
-        for category in os.environ.get(
-            "CATEGORIES",
-            "cs.CV,cs.CL,cs.AI,cs.GR,cs.LG,cs.HC,cs.NE",
-        ).split(",")
+        for category in category_value.split(",")
         if category.strip()
     }
 
@@ -65,7 +64,8 @@ def main() -> None:
     seen = set()
     for paper in client.results(search):
         paper_categories = list(paper.categories)
-        if categories and not categories.intersection(paper_categories):
+        primary_category = paper_categories[0] if paper_categories else ""
+        if categories and primary_category not in categories:
             continue
 
         item = {

@@ -50,6 +50,7 @@ jobs:
         export TOKEN_GITHUB=${{ secrets.TOKEN_GITHUB }}
         export LANGUAGE="${{ vars.LANGUAGE }}"
         export CATEGORIES="${{ vars.CATEGORIES }}"
+        export CATEGORIES="${CATEGORIES:-cs.CV,cs.CL,cs.AI,cs.GR,cs.LG}"
         export INCLUDE_KEYWORDS="${{ vars.INCLUDE_KEYWORDS }}"
         export MODEL_NAME="${{ vars.MODEL_NAME }}"
         
