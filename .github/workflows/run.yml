@@ -114,7 +114,7 @@ jobs:
         esac
         
     - name: AI Enhancement Processing
-      if: steps.dedup_check.outputs.has_new_content == 'true'
+      if: steps.dedup_check.outputs.has_new_content == 'true' || github.event_name == 'workflow_dispatch'
       run: |
         source .venv/bin/activate
         today=${{ steps.crawl_step.outputs.crawl_date }}
@@ -137,7 +137,7 @@ jobs:
         echo "AI增强处理完成 / AI enhancement processing completed"
         
     - name: Convert to Markdown
-      if: steps.dedup_check.outputs.has_new_content == 'true'
+      if: steps.dedup_check.outputs.has_new_content == 'true' || github.event_name == 'workflow_dispatch'
       run: |
         source .venv/bin/activate
         today=${{ steps.crawl_step.outputs.crawl_date }}
@@ -168,7 +168,7 @@ jobs:
         echo "Markdown转换完成 / Markdown conversion completed"
 
     - name: Sync latest main before site update
-      if: steps.dedup_check.outputs.has_new_content == 'true'
+      if: steps.dedup_check.outputs.has_new_content == 'true' || github.event_name == 'workflow_dispatch'
       run: |
         echo "同步最新 main 并保留本次生成的数据... / Syncing latest main while preserving generated data..."
         mkdir -p /tmp/site_update/data
@@ -182,14 +182,14 @@ jobs:
         echo "main 已同步，本次数据已恢复 / Main synced and generated data restored"
         
     - name: Update file list
-      if: steps.dedup_check.outputs.has_new_content == 'true'
+      if: steps.dedup_check.outputs.has_new_content == 'true' || github.event_name == 'workflow_dispatch'
       run: |
         echo "更新文件列表... / Updating file list..."
         ls data/*.jsonl | sed 's|data/||' > assets/file-list.txt
         echo "文件列表更新完成 / File list updated"
 
     - name: Generate password hash and inject into config
-      if: steps.dedup_check.outputs.has_new_content == 'true'
+      if: steps.dedup_check.outputs.has_new_content == 'true' || github.event_name == 'workflow_dispatch'
       run: |
         echo "🔐 Generating password hash for authentication..."
 
@@ -244,7 +244,7 @@ jobs:
         fi
         
     - name: Inject repository info into data-config.js
-      if: steps.dedup_check.outputs.has_new_content == 'true'
+      if: steps.dedup_check.outputs.has_new_content == 'true' || github.event_name == 'workflow_dispatch'
       run: |
         echo "注入仓库信息到 data-config.js... / Injecting repository info into data-config.js..."
         
@@ -266,7 +266,7 @@ jobs:
         fi
 
     - name: Commit code changes to main branch
-      if: steps.dedup_check.outputs.has_new_content == 'true'
+      if: steps.dedup_check.outputs.has_new_content == 'true' || github.event_name == 'workflow_dispatch'
       run: |
         git config --global user.email "${{ vars.EMAIL }}"
         git config --global user.name "${{ vars.NAME }}"
@@ -286,7 +286,7 @@ jobs:
         fi
 
     - name: Push code changes to main branch
-      if: steps.dedup_check.outputs.has_new_content == 'true'
+      if: steps.dedup_check.outputs.has_new_content == 'true' || github.event_name == 'workflow_dispatch'
       run: |
         # 设置Git配置以处理自动合并 / Set Git config for automatic merging
         git config pull.rebase true
@@ -309,7 +309,7 @@ jobs:
         done
 
     - name: Prepare data files for data branch
-      if: steps.dedup_check.outputs.has_new_content == 'true'
+      if: steps.dedup_check.outputs.has_new_content == 'true' || github.event_name == 'workflow_dispatch'
       run: |
         echo "准备数据文件... / Preparing data files..."
         today=${{ steps.crawl_step.outputs.crawl_date }}
@@ -325,7 +325,7 @@ jobs:
         echo "数据文件已保存到临时目录 / Data files saved to temporary directory"
 
     - name: Setup and commit to data branch
-      if: steps.dedup_check.outputs.has_new_content == 'true'
+      if: steps.dedup_check.outputs.has_new_content == 'true' || github.event_name == 'workflow_dispatch'
       run: |
         git config --global user.email "${{ vars.EMAIL }}"
         git config --global user.name "${{ vars.NAME }}"
@@ -379,7 +379,7 @@ jobs:
         fi
 
     - name: Push data changes to data branch
-      if: steps.dedup_check.outputs.has_new_content == 'true'
+      if: steps.dedup_check.outputs.has_new_content == 'true' || github.event_name == 'workflow_dispatch'
       run: |
         # 设置Git配置以处理自动合并 / Set Git config for automatic merging
         git config pull.rebase true
