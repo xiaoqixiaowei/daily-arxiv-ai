@@ -51,6 +51,9 @@ jobs:
         export LANGUAGE="${{ vars.LANGUAGE }}"
         export CATEGORIES="${{ vars.CATEGORIES }}"
         export CATEGORIES="${CATEGORIES:-cs.CV,cs.AI,cs.RO,cs.CL}"
+        if [ "$CATEGORIES" = "cs.CV,cs.CL,cs.AI,cs.GR,cs.LG" ] || [ "$CATEGORIES" = "cs.CV,cs.AI,cs.GR,cs.LG,cs.CL" ]; then
+          CATEGORIES="cs.CV,cs.AI,cs.RO,cs.CL"
+        fi
         export MAX_PAPERS="${{ vars.MAX_PAPERS }}"
         export MAX_PAPERS="${MAX_PAPERS:-10}"
         export ARXIV_API_DELAY_SECONDS="${{ vars.ARXIV_API_DELAY_SECONDS }}"

@@ -56,6 +56,9 @@ else
     # 设置默认值 / Set default values
     export LANGUAGE="${LANGUAGE:-Chinese}"
     export CATEGORIES="${CATEGORIES:-cs.CV,cs.AI,cs.RO,cs.CL}"
+    if [ "$CATEGORIES" = "cs.CV,cs.CL,cs.AI,cs.GR,cs.LG" ] || [ "$CATEGORIES" = "cs.CV,cs.AI,cs.GR,cs.LG,cs.CL" ]; then
+        CATEGORIES="cs.CV,cs.AI,cs.RO,cs.CL"
+    fi
     export MAX_PAPERS="${MAX_PAPERS:-10}"
     export ARXIV_API_DELAY_SECONDS="${ARXIV_API_DELAY_SECONDS:-8}"
     export ARXIV_API_NUM_RETRIES="${ARXIV_API_NUM_RETRIES:-5}"

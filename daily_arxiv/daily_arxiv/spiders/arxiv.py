@@ -3,12 +3,17 @@ import os
 import re
 
 
+DEFAULT_CATEGORIES = "cs.CV,cs.AI,cs.RO,cs.CL"
+DEPRECATED_DEFAULT_CATEGORIES = {
+    "cs.CV,cs.CL,cs.AI,cs.GR,cs.LG",
+    "cs.CV,cs.AI,cs.GR,cs.LG,cs.CL",
+}
+
+
 class ArxivSpider(scrapy.Spider):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        default_categories = "cs.CV,cs.AI,cs.RO,cs.CL"
-        categories = os.environ.get("CATEGORIES", default_categories)
-        categories = categories or default_categories
+        categories = normalize_categories(os.environ.get("CATEGORIES"))
         categories = categories.split(",")
         # 保存目标分类列表，用于后续验证
         self.target_categories = set(map(str.strip, categories))
@@ -77,3 +82,15 @@ class ArxivSpider(scrapy.Spider):
                     "id": arxiv_id,
                     "categories": [],
                 }
+
+
+def normalize_categories(raw_categories: str | None) -> str:
+    categories = (raw_categories or DEFAULT_CATEGORIES).strip()
+    normalized = ",".join(
+        category.strip()
+        for category in categories.split(",")
+        if category.strip()
+    )
+    if normalized in DEPRECATED_DEFAULT_CATEGORIES:
+        return DEFAULT_CATEGORIES
+    return normalized or DEFAULT_CATEGORIES
