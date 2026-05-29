@@ -263,11 +263,27 @@ NEGATIVE_TERMS = [
     "xr prototyping",
 ]
 
+DEFAULT_MAX_PAPERS = 10
+DEFAULT_ARXIV_API_DELAY_SECONDS = 8.0
+DEFAULT_ARXIV_API_NUM_RETRIES = 5
+
 
 class DailyArxivPipeline:
     def __init__(self):
-        self.page_size = 100
-        self.client = arxiv.Client(self.page_size)
+        self.page_size = 1
+        self.max_papers = get_int_env("MAX_PAPERS", DEFAULT_MAX_PAPERS)
+        self.kept_count = 0
+        self.client = arxiv.Client(
+            page_size=self.page_size,
+            delay_seconds=get_float_env(
+                "ARXIV_API_DELAY_SECONDS",
+                DEFAULT_ARXIV_API_DELAY_SECONDS,
+            ),
+            num_retries=get_int_env(
+                "ARXIV_API_NUM_RETRIES",
+                DEFAULT_ARXIV_API_NUM_RETRIES,
+            ),
+        )
         include_keywords = os.environ.get("INCLUDE_KEYWORDS", "")
         self.include_keywords = [
             keyword.strip().lower()
@@ -279,12 +295,25 @@ class DailyArxivPipeline:
         self.include_keywords = self.include_keywords or DEFAULT_INCLUDE_KEYWORDS
 
     def process_item(self, item: dict, spider):
+        if self.max_papers > 0 and self.kept_count >= self.max_papers:
+            self.close_for_max_papers(spider)
+            raise DropItem(f"Skipped {item['id']}: max_papers_reached({self.max_papers})")
+
         item["pdf"] = f"https://arxiv.org/pdf/{item['id']}"
         item["abs"] = f"https://arxiv.org/abs/{item['id']}"
         search = arxiv.Search(
             id_list=[item["id"]],
+            max_results=1,
         )
-        paper = next(self.client.results(search))
+        try:
+            paper = next(self.client.results(search))
+        except StopIteration as exc:
+            spider.logger.warning("dropped: arxiv_api_empty %s", item["id"])
+            raise DropItem(f"Skipped {item['id']}: arxiv_api_empty") from exc
+        except arxiv.HTTPError as exc:
+            spider.logger.warning("dropped: arxiv_api_error(%s) %s", exc, item["id"])
+            raise DropItem(f"Skipped {item['id']}: arxiv_api_error({exc})") from exc
+
         item["authors"] = [a.name for a in paper.authors]
         item["title"] = paper.title
         item["categories"] = paper.categories
@@ -295,7 +324,20 @@ class DailyArxivPipeline:
             spider.logger.info("dropped: %s %s", reason, item["id"])
             raise DropItem(f"Skipped {item['id']}: {reason}")
         spider.logger.info("kept: %s %s", reason, item["id"])
+        self.kept_count += 1
+        if self.max_papers > 0 and self.kept_count >= self.max_papers:
+            self.close_for_max_papers(spider)
         return item
+
+    def close_for_max_papers(self, spider):
+        spider.logger.info(
+            "max_papers reached: closing spider after %s kept papers",
+            self.kept_count,
+        )
+        spider.crawler.engine.close_spider(
+            spider,
+            reason=f"max_papers_{self.max_papers}",
+        )
 
     def matches_include_keywords(self, item: dict) -> bool:
         matched, _ = self.get_match_reason(item)
@@ -348,3 +390,19 @@ def term_in_text(term: str, text: str) -> bool:
     if re.fullmatch(r"[a-z0-9]+", term) and len(term) <= 5:
         return re.search(rf"(?<![a-z0-9]){re.escape(term)}(?![a-z0-9])", text) is not None
     return term in text
+
+
+def get_int_env(name: str, default: int) -> int:
+    raw_value = os.environ.get(name, str(default)).strip()
+    try:
+        return int(raw_value)
+    except ValueError:
+        return default
+
+
+def get_float_env(name: str, default: float) -> float:
+    raw_value = os.environ.get(name, str(default)).strip()
+    try:
+        return float(raw_value)
+    except ValueError:
+        return default
