@@ -1,10 +1,9 @@
 arxiv:
   categories:  # 文章类型
     - cs.CV
-    - cs.CL
     - cs.AI
-    - cs.GR
-    - cs.LG
+    - cs.RO
+    - cs.CL
 
 llm:
   model_name: 'glm-5.1'  # 使用的LLM模型

@@ -50,8 +50,10 @@ jobs:
         export TOKEN_GITHUB=${{ secrets.TOKEN_GITHUB }}
         export LANGUAGE="${{ vars.LANGUAGE }}"
         export CATEGORIES="${{ vars.CATEGORIES }}"
-        export CATEGORIES="${CATEGORIES:-cs.CV,cs.CL,cs.AI,cs.GR,cs.LG}"
-        DEFAULT_INCLUDE_KEYWORDS="vision-language model,vision language model,vlm,multimodal large language model,mllm,video-language model,world model,world models,world modeling,video world model,generative world model,action-conditioned world model,embodied world model,game agent,game agents,game-playing agent,game playing agent,multimodal game agent,autonomous game agent,llm game agent,vlm game agent,game ai,game environment,game environments,game benchmark,game benchmarks,gameplay reasoning,gameplay understanding,minecraft benchmark,minecraft agent"
+        export CATEGORIES="${CATEGORIES:-cs.CV,cs.AI,cs.RO,cs.CL}"
+        export MAX_PAPERS="${{ vars.MAX_PAPERS }}"
+        export MAX_PAPERS="${MAX_PAPERS:-10}"
+        DEFAULT_INCLUDE_KEYWORDS="vision-language-action,vision language action,vla,robot foundation model,robotic foundation model,embodied agent,embodied agents,game agent,game agents,minecraft agent,minecraft agents"
         DEPRECATED_GAME_KEYWORDS="game agent,game agents,gaming agent,game ai,game-playing,game playing,minecraft,videogame,video game,video games,game environment,game environments,game benchmark,game benchmarks"
         DEPRECATED_EXTENDED_GAME_KEYWORDS="game agent,game agents,gaming agent,game ai,game-playing,game playing,minecraft,videogame,video game,video games,game environment,game environments,game benchmark,game benchmarks,gameplay,game engine,game engines,in-game,cross-game,super mario,card games,role-playing game,video role-playing,rpg generation,endless runner game"
         REPO_INCLUDE_KEYWORDS="${{ vars.INCLUDE_KEYWORDS }}"
@@ -81,6 +83,8 @@ jobs:
         echo "执行去重检查... / Performing intelligent deduplication check..."
         
         cd daily_arxiv
+        export MAX_PAPERS="${{ vars.MAX_PAPERS }}"
+        export MAX_PAPERS="${MAX_PAPERS:-10}"
         # 执行去重检查脚本 / Execute intelligent deduplication check script
         set +e  # 暂时允许命令失败 / Temporarily allow command failure
         python daily_arxiv/check_stats.py

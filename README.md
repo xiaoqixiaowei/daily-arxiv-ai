@@ -43,7 +43,7 @@ https://github.com/user-attachments/assets/b25712a4-fb8d-484f-863d-e8da6922f9d7
 
 
 # How to use
-This repo will daily crawl arXiv papers about **VLMs, multimodal agents, world models, and game agents/game benchmarks**, then use an OpenAI-compatible LLM such as **GLM-5.1** (`glm-5.1`) to summarize the papers in **Chinese**.
+This repo will daily crawl arXiv papers about **VLM/VLA robotics** and **LLM/VLM game agents or game benchmarks**, then use an OpenAI-compatible LLM such as **GLM-5.1** (`glm-5.1`) to summarize the papers in **Chinese**.
 If you wish to crawl other arXiv categories, use other LLMs, or other languages, please follow the instructions.
 Otherwise, you can directly use this repo in https://dw-dengwei.github.io/daily-arXiv-ai-enhanced/. Please star it if you like :)
 
@@ -55,11 +55,12 @@ Otherwise, you can directly use this repo in https://dw-dengwei.github.io/daily-
 5. [Optional] Set a password in `secrets.ACCESS_PASSWORD` if you do not wish others to access your page. (see https://github.com/dw-dengwei/daily-arXiv-ai-enhanced/pull/64)
 6. Go to Variables. Variables are shown as plain text and are used for non-sensitive data
 7. Create the following repository variables:
-   1. `CATEGORIES`: separate the categories with ",", such as "cs.CL, cs.CV"
+   1. `CATEGORIES`: separate the categories with ",", such as "cs.CV,cs.AI,cs.RO,cs.CL"
    2. `LANGUAGE`: such as "Chinese" or "English"
    3. `MODEL_NAME`: such as "glm-5.1"
-   4. `EMAIL`: your email for push to GitHub
-   5. `NAME`: your name for push to GitHub
+   4. `MAX_PAPERS`: maximum papers to process after filtering, such as "10" for smoke testing. Set "0" to disable the limit.
+   5. `EMAIL`: your email for push to GitHub
+   6. `NAME`: your name for push to GitHub
 8. Go to your-own-repo -> Actions -> arXiv-daily-ai-enhanced
 9. You can manually click **Run workflow** to test if it works well (it may take about one hour). By default, this action will automatically run every day. You can modify it in `.github/workflows/run.yml`
 10. Set up GitHub pages: Go to your own repo -> Settings -> Pages. In `Build and deployment`, set `Source="Deploy from a branch"`, `Branch="main", "/(root)"`. Wait for a few minutes, go to https://\<username\>.github.io/daily-arXiv-ai-enhanced/. Please see this [issue](https://github.com/dw-dengwei/daily-arXiv-ai-enhanced/issues/14) for more precise instructions.

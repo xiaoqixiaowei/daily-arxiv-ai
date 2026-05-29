@@ -6,7 +6,7 @@ import re
 class ArxivSpider(scrapy.Spider):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        default_categories = "cs.CV,cs.CL,cs.AI,cs.GR,cs.LG"
+        default_categories = "cs.CV,cs.AI,cs.RO,cs.CL"
         categories = os.environ.get("CATEGORIES", default_categories)
         categories = categories or default_categories
         categories = categories.split(",")

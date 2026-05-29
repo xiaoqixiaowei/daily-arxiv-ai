@@ -58,7 +58,7 @@ def main() -> None:
     parser.add_argument("--max-results", type=int, default=80)
     args = parser.parse_args()
 
-    default_categories = "cs.CV,cs.CL,cs.AI,cs.GR,cs.LG"
+    default_categories = "cs.CV,cs.AI,cs.RO,cs.CL"
     category_value = os.environ.get("CATEGORIES", default_categories) or default_categories
     categories = {
         category.strip()

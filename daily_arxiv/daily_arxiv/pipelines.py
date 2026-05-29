@@ -5,82 +5,25 @@
 
 
 # useful for handling different item types with a single interface
-import arxiv
 import os
+import re
+
+import arxiv
 from scrapy.exceptions import DropItem
 
 
 DEFAULT_INCLUDE_KEYWORDS = [
-    "vision-language model",
-    "vision language model",
-    "vision-language models",
-    "vision language models",
-    "vlm",
-    "vlms",
-    "multimodal large language model",
-    "multimodal large language models",
-    "mllm",
-    "mllms",
-    "multimodal llm",
-    "multimodal llms",
-    "video-language model",
-    "video language model",
-    "video-language models",
-    "video language models",
-    "visual language model",
-    "visual language models",
-    "world model",
-    "world models",
-    "world modeling",
-    "world modelling",
-    "video world model",
-    "video world models",
-    "generative world model",
-    "generative world models",
-    "action-conditioned world model",
-    "action conditioned world model",
-    "embodied world model",
-    "embodied world models",
-    "world-model-based",
-    "world model based",
-    "world generation",
-    "interactive world model",
-    "interactive world models",
+    "vision-language-action",
+    "vision language action",
+    "vla",
+    "robot foundation model",
+    "robotic foundation model",
+    "embodied agent",
+    "embodied agents",
     "game agent",
     "game agents",
-    "gaming agent",
-    "gaming agents",
-    "game-playing agent",
-    "game playing agent",
-    "game-playing agents",
-    "game playing agents",
-    "multimodal game agent",
-    "multimodal game agents",
-    "autonomous game agent",
-    "autonomous game agents",
-    "llm game agent",
-    "llm game agents",
-    "vlm game agent",
-    "vlm game agents",
-    "agents in games",
-    "agent in games",
-    "game ai",
-    "game environment",
-    "game environments",
-    "game benchmark",
-    "game benchmarks",
-    "game-based benchmark",
-    "game based benchmark",
-    "gameplay reasoning",
-    "gameplay understanding",
-    "gameplay video understanding",
-    "minecraft benchmark",
     "minecraft agent",
     "minecraft agents",
-    "minecraft environment",
-    "minecraft environments",
-    "minecraft world",
-    "minecraft worlds",
 ]
 
 DEPRECATED_INCLUDE_KEYWORD_SETS = {
@@ -129,25 +72,159 @@ DEPRECATED_INCLUDE_KEYWORD_SETS = {
     ),
 }
 
-GAME_MEDIA_TERMS = [
+MODEL_TERMS = [
+    "vision-language model",
+    "vision language model",
+    "vision-language models",
+    "vision language models",
+    "large vision-language model",
+    "large vision-language models",
+    "large vision language model",
+    "large vision language models",
+    "visual language model",
+    "visual language models",
+    "video-language model",
+    "video language model",
+    "video-language models",
+    "video language models",
+    "multimodal large language model",
+    "multimodal large language models",
+    "multimodal llm",
+    "multimodal llms",
+    "vision-language-action",
+    "vision language action",
+    "vlm",
+    "vlms",
+    "lvlm",
+    "lvlms",
+    "mllm",
+    "mllms",
+    "llm",
+    "llms",
+    "vla",
+]
+
+ROBOTICS_TERMS = [
+    "robot",
+    "robots",
+    "robotic",
+    "robotics",
+    "embodied",
+    "manipulation",
+    "manipulator",
+    "navigation",
+    "locomotion",
+    "grasp",
+    "grasping",
+    "mobile robot",
+    "mobile robots",
+    "humanoid",
+    "humanoids",
+    "autonomous driving",
+    "motion planning",
+    "path planning",
+    "task planning",
+    "robot planning",
+    "robotic planning",
+    "embodied planning",
+    "robot control",
+    "robotic control",
+    "embodied control",
+    "visuomotor control",
+    "visual motor control",
+    "physical world",
+    "3d scene",
+    "3d scenes",
+    "world model",
+    "world models",
+    "world modeling",
+    "world modelling",
+]
+
+STRONG_ROBOTICS_TERMS = [
+    "robot",
+    "robots",
+    "robotic",
+    "robotics",
+    "embodied",
+    "manipulation",
+    "manipulator",
+    "navigation",
+    "locomotion",
+    "grasp",
+    "grasping",
+    "mobile robot",
+    "mobile robots",
+    "humanoid",
+    "humanoids",
+    "autonomous driving",
+    "physical world",
+    "3d scene",
+    "3d scenes",
+    "world model",
+    "world models",
+]
+
+GAME_TERMS = [
+    "game agent",
+    "game agents",
+    "game-playing agent",
+    "game playing agent",
+    "game-playing agents",
+    "game playing agents",
+    "game environment",
+    "game environments",
+    "game benchmark",
+    "game benchmarks",
+    "game-based benchmark",
+    "game based benchmark",
+    "gameplay reasoning",
+    "gameplay understanding",
+    "gameplay video understanding",
+    "minecraft",
+    "minecraft agent",
+    "minecraft agents",
+    "minecraft benchmark",
+    "minecraft environment",
+    "minecraft environments",
     "video game",
     "video games",
     "videogame",
-    "gameplay",
+    "game ai",
     "game engine",
     "game engines",
-    "in-game",
-    "cross-game",
-    "minecraft",
-    "super mario",
-    "card games",
-    "role-playing game",
-    "video role-playing",
-    "rpg generation",
-    "endless runner game",
 ]
 
-NON_VIDEO_GAME_TERMS = [
+EXCLUDED_APPLICATION_TERMS = [
+    "medical",
+    "clinical",
+    "radiology",
+    "radiological",
+    "retinal",
+    "retina",
+    "ct analysis",
+    "mri",
+    "x-ray",
+    "chest x-ray",
+    "surgical",
+    "surgery",
+    "education",
+    "educational",
+    "nursing",
+    "chart",
+    "charts",
+    "plot",
+    "anime",
+    "food",
+    "satellite",
+    "remote sensing",
+    "geospatial",
+    "aerial",
+    "microscopy",
+    "agriculture",
+]
+
+NEGATIVE_TERMS = [
     "game theory",
     "game-theoretic",
     "nash",
@@ -186,26 +263,6 @@ NON_VIDEO_GAME_TERMS = [
     "xr prototyping",
 ]
 
-AGENT_CONTEXT_TERMS = [
-    "agent",
-    "agents",
-    "vlm",
-    "vlms",
-    "reinforcement learning",
-    "decision-making",
-    "decision making",
-    "planning",
-    "control",
-    "navigation",
-    "world model",
-    "world models",
-    "embodied",
-    "environment",
-    "environments",
-    "benchmark",
-    "benchmarks",
-]
-
 
 class DailyArxivPipeline:
     def __init__(self):
@@ -233,23 +290,61 @@ class DailyArxivPipeline:
         item["categories"] = paper.categories
         item["comment"] = paper.comment
         item["summary"] = paper.summary
-        if not self.matches_include_keywords(item):
-            raise DropItem(f"Skipped {item['id']} because it did not match INCLUDE_KEYWORDS")
+        matched, reason = self.get_match_reason(item)
+        if not matched:
+            spider.logger.info("dropped: %s %s", reason, item["id"])
+            raise DropItem(f"Skipped {item['id']}: {reason}")
+        spider.logger.info("kept: %s %s", reason, item["id"])
         return item
 
     def matches_include_keywords(self, item: dict) -> bool:
+        matched, _ = self.get_match_reason(item)
+        return matched
+
+    def get_match_reason(self, item: dict) -> tuple[bool, str]:
         haystack = " ".join([
             item.get("title") or "",
             item.get("summary") or "",
             item.get("comment") or "",
             " ".join(item.get("categories") or []),
         ]).lower()
-        if any(term in haystack for term in NON_VIDEO_GAME_TERMS):
-            return False
 
-        if any(keyword in haystack for keyword in self.include_keywords):
-            return True
+        negative_hits = find_terms(haystack, NEGATIVE_TERMS)
+        if negative_hits:
+            return False, f"negative_term({negative_hits[0]})"
 
-        has_game_context = any(term in haystack for term in GAME_MEDIA_TERMS)
-        has_agent_context = any(term in haystack for term in AGENT_CONTEXT_TERMS)
-        return has_game_context and has_agent_context
+        forced_hits = find_terms(haystack, self.include_keywords)
+        robotics_hits = find_terms(haystack, ROBOTICS_TERMS)
+        strong_robotics_hits = find_terms(haystack, STRONG_ROBOTICS_TERMS)
+        game_hits = find_terms(haystack, GAME_TERMS)
+        if forced_hits:
+            return True, f"strong_include({forced_hits[0]})"
+
+        model_hits = find_terms(haystack, MODEL_TERMS)
+        if not model_hits:
+            return False, "missing_model_term"
+
+        application_hits = find_terms(haystack, EXCLUDED_APPLICATION_TERMS)
+        if application_hits and not (strong_robotics_hits or game_hits):
+            return False, f"generic_vlm_application({application_hits[0]})"
+
+        if game_hits:
+            return True, f"llm/vlm+game({game_hits[0]})"
+
+        if robotics_hits:
+            return True, f"vlm+robotics({robotics_hits[0]})"
+
+        return False, "generic_vlm_without_robotics_or_game"
+
+
+def find_terms(text: str, terms: list[str]) -> list[str]:
+    return [term for term in terms if term_in_text(term, text)]
+
+
+def term_in_text(term: str, text: str) -> bool:
+    if not term:
+        return False
+    term = term.lower()
+    if re.fullmatch(r"[a-z0-9]+", term) and len(term) <= 5:
+        return re.search(rf"(?<![a-z0-9]){re.escape(term)}(?![a-z0-9])", text) is not None
+    return term in text

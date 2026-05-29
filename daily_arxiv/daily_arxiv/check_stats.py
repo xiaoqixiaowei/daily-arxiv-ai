@@ -13,6 +13,8 @@ import sys
 import os
 from datetime import datetime, timedelta
 
+DEFAULT_MAX_PAPERS = 10
+
 def load_papers_data(file_path):
     """
     从jsonl文件中加载完整的论文数据
@@ -60,6 +62,48 @@ def save_papers_data(papers, file_path):
         print(f"Error saving {file_path}: {e}", file=sys.stderr)
         return False
 
+def deduplicate_current_day(papers):
+    """
+    对当天数据按 arXiv ID 去重，保留第一次出现的条目
+    Deduplicate today's data by arXiv ID, keeping the first occurrence
+    """
+    deduplicated = []
+    seen_ids = set()
+    duplicate_count = 0
+
+    for paper in papers:
+        paper_id = paper.get('id', '')
+        if paper_id and paper_id in seen_ids:
+            duplicate_count += 1
+            continue
+        if paper_id:
+            seen_ids.add(paper_id)
+        deduplicated.append(paper)
+
+    return deduplicated, duplicate_count
+
+def get_max_papers():
+    """
+    读取最终处理数量上限；0 或负数表示不限制
+    Read final processing limit; 0 or negative means unlimited
+    """
+    raw_value = os.environ.get("MAX_PAPERS", str(DEFAULT_MAX_PAPERS)).strip()
+    try:
+        return int(raw_value)
+    except ValueError:
+        print(f"MAX_PAPERS 无效，使用默认值 {DEFAULT_MAX_PAPERS} / Invalid MAX_PAPERS, using default {DEFAULT_MAX_PAPERS}", file=sys.stderr)
+        return DEFAULT_MAX_PAPERS
+
+def apply_max_papers(papers):
+    """
+    限制最终进入 AI 增强的论文数量
+    Limit final papers sent to AI enhancement
+    """
+    max_papers = get_max_papers()
+    if max_papers <= 0 or len(papers) <= max_papers:
+        return papers, 0, max_papers
+    return papers[:max_papers], len(papers) - max_papers, max_papers
+
 def perform_deduplication():
     """
     执行多日去重：删除与历史多日重复的论文条目，保留新内容
@@ -88,6 +132,16 @@ def perform_deduplication():
         if not today_papers:
             return "no_data"
 
+        today_papers, current_day_duplicate_count = deduplicate_current_day(today_papers)
+        if current_day_duplicate_count:
+            print(f"发现 {current_day_duplicate_count} 篇当天重复论文 / Found {current_day_duplicate_count} same-day duplicate papers", file=sys.stderr)
+            if not save_papers_data(today_papers, today_file):
+                print("保存当天去重后的数据失败 / Failed to save same-day deduplicated data", file=sys.stderr)
+                return "error"
+            print(f"当天去重后剩余论文数: {len(today_papers)} / Remaining papers after same-day deduplication: {len(today_papers)}", file=sys.stderr)
+
+        today_ids = {paper.get('id', '') for paper in today_papers if paper.get('id', '')}
+
         # 收集历史多日 ID 集合
         history_ids = set()
         for i in range(1, history_days + 1):
@@ -107,6 +161,9 @@ def perform_deduplication():
             print(f"去重后剩余论文数: {len(new_papers)} / Remaining papers after deduplication: {len(new_papers)}", file=sys.stderr)
 
             if new_papers:
+                new_papers, limited_count, max_papers = apply_max_papers(new_papers)
+                if limited_count:
+                    print(f"Smoke test 限制：保留前 {max_papers} 篇，跳过 {limited_count} 篇 / Smoke test limit: kept first {max_papers}, skipped {limited_count}", file=sys.stderr)
                 if save_papers_data(new_papers, today_file):
                     print(f"已更新今日文件，移除 {len(duplicate_ids)} 篇重复论文 / Today's file updated, removed {len(duplicate_ids)} duplicate papers", file=sys.stderr)
                     return "has_new_content"
@@ -121,6 +178,12 @@ def perform_deduplication():
                     print(f"删除文件失败: {e} / Failed to delete file: {e}", file=sys.stderr)
                 return "no_new_content"
         else:
+            today_papers, limited_count, max_papers = apply_max_papers(today_papers)
+            if limited_count:
+                print(f"Smoke test 限制：保留前 {max_papers} 篇，跳过 {limited_count} 篇 / Smoke test limit: kept first {max_papers}, skipped {limited_count}", file=sys.stderr)
+                if not save_papers_data(today_papers, today_file):
+                    print("保存数量限制后的数据失败 / Failed to save limited data", file=sys.stderr)
+                    return "error"
             print("所有内容均为新内容 / All content is new", file=sys.stderr)
             return "has_new_content"
 
@@ -162,4 +225,4 @@ def main():
         sys.exit(2)
 
 if __name__ == "__main__":
-    main() 
+    main()
