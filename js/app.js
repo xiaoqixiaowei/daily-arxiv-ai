@@ -933,6 +933,7 @@ function parseJsonlData(jsonlText, date) {
         details: paper.summary || '',
         date: date,
         id: paper.id,
+        hasAiSummary: !!paper.AI,
         motivation: paper.AI && paper.AI.motivation ? paper.AI.motivation : '',
         method: paper.AI && paper.AI.method ? paper.AI.method : '',
         result: paper.AI && paper.AI.result ? paper.AI.result : '',
@@ -1046,6 +1047,46 @@ function highlightMatches(text, terms, className = 'highlight-match') {
   });
   
   return result;
+}
+
+function splitSentences(text) {
+  if (!text) {
+    return [];
+  }
+
+  const matches = text.match(/[^.!?。！？]+[.!?。！？]+|[^.!?。！？]+$/g);
+  return matches ? matches.map(sentence => sentence.trim()).filter(Boolean) : [];
+}
+
+function firstMatchingSentence(sentences, patterns, fallbackIndex = 0) {
+  const matched = sentences.find(sentence => patterns.some(pattern => pattern.test(sentence)));
+  return matched || sentences[fallbackIndex] || '';
+}
+
+function buildFallbackPreview(paper) {
+  const abstract = paper.details || paper.summary || '';
+  const sentences = splitSentences(abstract);
+  const firstTwo = sentences.slice(0, 2).join(' ');
+
+  return {
+    summary: paper.summary || firstTwo || abstract,
+    motivation: firstMatchingSentence(
+      sentences,
+      [/ready/i, /challenge/i, /gap/i, /remain/i, /lack/i, /underexplored/i, /problem/i],
+      0
+    ),
+    method: firstMatchingSentence(
+      sentences,
+      [/introduce/i, /present/i, /propose/i, /develop/i, /framework/i, /benchmark/i, /system/i],
+      Math.min(1, sentences.length - 1)
+    ),
+    result: firstMatchingSentence(
+      sentences,
+      [/result/i, /show/i, /evaluate/i, /achieve/i, /yield/i, /improve/i, /experiment/i],
+      Math.min(2, sentences.length - 1)
+    ),
+    conclusion: sentences[sentences.length - 1] || ''
+  };
 }
 
 // 帮助函数：格式化作者列表（用于论文卡片显示）
@@ -1473,10 +1514,12 @@ function showPaperDetails(paper, paperIndex) {
     ? highlightMatches(paper.authors, modalAuthorTerms, 'author-highlight') 
     : paper.authors;
   
+  const preview = paper.hasAiSummary ? paper : buildFallbackPreview(paper);
+
   // 高亮摘要（关键词 + 文本搜索）
   const highlightedSummary = modalTitleTerms.length > 0 
-    ? highlightMatches(paper.summary, modalTitleTerms, 'keyword-highlight') 
-    : paper.summary;
+    ? highlightMatches(preview.summary, modalTitleTerms, 'keyword-highlight') 
+    : preview.summary;
   
   // 高亮详情（Abstract/details）
   const highlightedAbstract = modalTitleTerms.length > 0 
@@ -1484,21 +1527,21 @@ function showPaperDetails(paper, paperIndex) {
     : abstractText;
   
   // 高亮其他部分（如果存在且是摘要的一部分）
-  const highlightedMotivation = paper.motivation && modalTitleTerms.length > 0 
-    ? highlightMatches(paper.motivation, modalTitleTerms, 'keyword-highlight') 
-    : paper.motivation;
+  const highlightedMotivation = preview.motivation && modalTitleTerms.length > 0 
+    ? highlightMatches(preview.motivation, modalTitleTerms, 'keyword-highlight') 
+    : preview.motivation;
   
-  const highlightedMethod = paper.method && modalTitleTerms.length > 0 
-    ? highlightMatches(paper.method, modalTitleTerms, 'keyword-highlight') 
-    : paper.method;
+  const highlightedMethod = preview.method && modalTitleTerms.length > 0 
+    ? highlightMatches(preview.method, modalTitleTerms, 'keyword-highlight') 
+    : preview.method;
   
-  const highlightedResult = paper.result && modalTitleTerms.length > 0 
-    ? highlightMatches(paper.result, modalTitleTerms, 'keyword-highlight') 
-    : paper.result;
+  const highlightedResult = preview.result && modalTitleTerms.length > 0 
+    ? highlightMatches(preview.result, modalTitleTerms, 'keyword-highlight') 
+    : preview.result;
   
-  const highlightedConclusion = paper.conclusion && modalTitleTerms.length > 0 
-    ? highlightMatches(paper.conclusion, modalTitleTerms, 'keyword-highlight') 
-    : paper.conclusion;
+  const highlightedConclusion = preview.conclusion && modalTitleTerms.length > 0 
+    ? highlightMatches(preview.conclusion, modalTitleTerms, 'keyword-highlight') 
+    : preview.conclusion;
   
   // 判断是否需要显示高亮说明
   const showHighlightLegend = activeKeywords.length > 0 || activeAuthors.length > 0;
@@ -1517,10 +1560,10 @@ function showPaperDetails(paper, paperIndex) {
       <p>${highlightedSummary}</p>
       
       <div class="paper-sections">
-        ${paper.motivation ? `<div class="paper-section"><h4>Motivation</h4><p>${highlightedMotivation}</p></div>` : ''}
-        ${paper.method ? `<div class="paper-section"><h4>Method</h4><p>${highlightedMethod}</p></div>` : ''}
-        ${paper.result ? `<div class="paper-section"><h4>Result</h4><p>${highlightedResult}</p></div>` : ''}
-        ${paper.conclusion ? `<div class="paper-section"><h4>Conclusion</h4><p>${highlightedConclusion}</p></div>` : ''}
+        ${preview.motivation ? `<div class="paper-section"><h4>Motivation</h4><p>${highlightedMotivation}</p></div>` : ''}
+        ${preview.method ? `<div class="paper-section"><h4>Method</h4><p>${highlightedMethod}</p></div>` : ''}
+        ${preview.result ? `<div class="paper-section"><h4>Result</h4><p>${highlightedResult}</p></div>` : ''}
+        ${preview.conclusion ? `<div class="paper-section"><h4>Conclusion</h4><p>${highlightedConclusion}</p></div>` : ''}
       </div>
       
       ${highlightedAbstract ? `<h3>Abstract</h3><p class="original-abstract">${highlightedAbstract}</p>` : ''}
