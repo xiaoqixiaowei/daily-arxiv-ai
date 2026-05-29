@@ -91,6 +91,11 @@ def normalize_categories(raw_categories: str | None) -> str:
         for category in categories.split(",")
         if category.strip()
     )
-    if normalized in DEPRECATED_DEFAULT_CATEGORIES:
+    category_set = set(normalized.split(","))
+    if (
+        normalized in DEPRECATED_DEFAULT_CATEGORIES
+        or "cs.GR" in category_set
+        or "cs.LG" in category_set
+    ):
         return DEFAULT_CATEGORIES
     return normalized or DEFAULT_CATEGORIES
