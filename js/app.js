@@ -938,6 +938,7 @@ function parseJsonlData(jsonlText, date) {
         method: paper.AI && paper.AI.method ? paper.AI.method : '',
         result: paper.AI && paper.AI.result ? paper.AI.result : '',
         conclusion: paper.AI && paper.AI.conclusion ? paper.AI.conclusion : '',
+        primaryAffiliation: paper.AI && paper.AI.primary_affiliation ? paper.AI.primary_affiliation : (paper.primary_affiliation || ''),
         code_url: paper.code_url || '',
         code_stars: paper.code_stars || 0,
         code_last_update: paper.code_last_update || ''
@@ -1552,6 +1553,7 @@ function showPaperDetails(paper, paperIndex) {
   const modalContent = `
     <div class="paper-details ${matchedPaperClass}">
       <p><strong>Authors: </strong>${highlightedAuthors}</p>
+      ${paper.primaryAffiliation ? `<p><strong>First affiliation: </strong>${paper.primaryAffiliation}</p>` : ''}
       <p><strong>Categories: </strong>${categoryDisplay}</p>
       <p><strong>Date: </strong>${formatDate(paper.date)}</p>
       

@@ -51,11 +51,13 @@ if __name__ == "__main__":
                 if not all(field in ai_data for field in required_fields):
                     print(f"Skipping item '{item.get('title', 'Unknown')}' due to incomplete AI fields")
                     continue
+                primary_affiliation = ai_data.get('primary_affiliation', '') or item.get('primary_affiliation', '')
                 
                 papers.append(
                     template.format(
                         title=item["title"],
                         authors=",".join(item["authors"]),
+                        primary_affiliation_line=f"First affiliation: {primary_affiliation}" if primary_affiliation else "",
                         summary=item["summary"],
                         url=item['abs'],
                         tldr=ai_data.get('tldr', ''),

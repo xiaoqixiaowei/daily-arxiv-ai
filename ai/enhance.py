@@ -32,12 +32,14 @@ Return only one valid JSON object with exactly these string fields:
   "motivation": "...",
   "method": "...",
   "result": "...",
-  "conclusion": "..."
+  "conclusion": "...",
+  "primary_affiliation": "..."
 }}
 Do not wrap the JSON in Markdown fences. Do not add any text before or after the JSON.
+For "primary_affiliation", infer the first author's institution if possible. Use a Chinese short name, such as "斯坦福", "MIT", "清华", "上交", "港大"; if it is hard to translate, keep the English short name. If unknown, return an empty string.
 """
 
-REQUIRED_AI_FIELDS = ["tldr", "motivation", "method", "result", "conclusion"]
+REQUIRED_AI_FIELDS = ["tldr", "motivation", "method", "result", "conclusion", "primary_affiliation"]
 
 def parse_args():
     """解析命令行参数"""
@@ -200,7 +202,8 @@ def build_chinese_fallback_ai(item: Dict, sentences: List[str], first_two: str) 
             "motivation": "当前 VLM 虽然在高层空间关系理解上已有一定能力，但在抓取点、可供性和轨迹等交互导向感知任务上仍然脆弱，缺少可靠的 3D 交互先验。",
             "method": "作者构建了 robot-centric 的 3D embodied benchmark，覆盖 grounding、空间关系预测、多视角对应、可供性预测、抓取点预测和轨迹预测等任务，并整理了 2.1 万余个问答样本。",
             "result": "论文评测了 13 个主流模型，发现现有模型在物体间位置关系等高层推理上表现较好，但在面向交互的低层感知能力上明显不足；进一步用 130 万 QA 训练数据微调后，低层空间智能得到提升。",
-            "conclusion": "Embodied3DBench 为面向机器人交互的多模态系统提供了系统评测框架和可扩展数据方案，也指出了 VLM 在具身 3D 交互理解上的关键改进方向。"
+            "conclusion": "Embodied3DBench 为面向机器人交互的多模态系统提供了系统评测框架和可扩展数据方案，也指出了 VLM 在具身 3D 交互理解上的关键改进方向。",
+            "primary_affiliation": ""
         }
 
     if "acoustic robots" in title_lower or "contactless object manipulation" in title_lower:
@@ -209,7 +212,8 @@ def build_chinese_fallback_ai(item: Dict, sentences: List[str], first_two: str) 
             "motivation": "自然语言接口可以降低多机器人系统的使用门槛，但将 LLM 与分布式声学移动机器人结合，用于无接触物体操作的研究仍然不足。",
             "method": "系统使用 Whisper 进行语音识别，通过 LLM 解析语义并生成结构化 JSON 任务表示，再结合分布式调度来处理机器人分配、时序依赖、空间约束和同步要求。",
             "result": "系统在 TurtleBot3 声学机器人平台上测试了顺序执行、并行运输和同步协作三类任务，成功率分别达到 96%、86% 和 70%。",
-            "conclusion": "结果表明，自然语言命令可以被转换为分布式机器人动作，为 LLM 驱动的人机交互和多机器人自动化提供了可行路径。"
+            "conclusion": "结果表明，自然语言命令可以被转换为分布式机器人动作，为 LLM 驱动的人机交互和多机器人自动化提供了可行路径。",
+            "primary_affiliation": ""
         }
 
     method = first_matching_sentence(
@@ -234,7 +238,8 @@ def build_chinese_fallback_ai(item: Dict, sentences: List[str], first_two: str) 
         "motivation": f"研究动机来自现有方法或系统中的不足：{motivation}",
         "method": f"方法上，论文主要采用或提出了如下思路：{method}",
         "result": f"实验或分析结果显示：{result}",
-        "conclusion": f"总体来看，论文结论是：{conclusion}"
+        "conclusion": f"总体来看，论文结论是：{conclusion}",
+        "primary_affiliation": ""
     }
 
 def build_fallback_ai(item: Dict, language: str) -> Dict:
@@ -272,7 +277,8 @@ def build_fallback_ai(item: Dict, language: str) -> Dict:
         "motivation": f"Motivation: {motivation}",
         "method": f"Method: {method}",
         "result": f"Result: {result}",
-        "conclusion": f"Conclusion: {conclusion}"
+        "conclusion": f"Conclusion: {conclusion}",
+        "primary_affiliation": ""
     }
 
 def parse_ai_response(content: str, default_ai_fields: Dict, paper_id: str) -> Dict:
@@ -354,7 +360,8 @@ def process_all_items(data: List[Dict], model_name: str, language: str, max_work
                     "motivation": "Processing failed",
                     "method": "Processing failed",
                     "result": "Processing failed",
-                    "conclusion": "Processing failed"
+                    "conclusion": "Processing failed",
+                    "primary_affiliation": ""
                 }
 
     return processed_data

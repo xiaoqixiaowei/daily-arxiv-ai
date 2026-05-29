@@ -1,6 +1,8 @@
 ### [{idx}] [{title}]({url})
 *{authors}*
 
+{primary_affiliation_line}
+
 Main category: {cate}
 
 TL;DR: {tldr}

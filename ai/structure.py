@@ -7,3 +7,4 @@ class Structure(BaseModel):
     method: str = Field(description="method of this paper")
     result: str = Field(description="result of this paper")
     conclusion: str = Field(description="conclusion of this paper")
+    primary_affiliation: str = Field(description="Chinese short name of the first author's affiliation, or English if hard to translate; empty if unknown")
