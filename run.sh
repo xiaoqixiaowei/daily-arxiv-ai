@@ -33,7 +33,7 @@ if [ -z "$OPENAI_API_KEY" ]; then
     echo "   export OPENAI_BASE_URL=\"https://models.sjtu.edu.cn/api/v1\"  # API基础URL / API base URL"
     echo "   export LANGUAGE=\"Chinese\"                           # 语言设置 / Language setting"
     echo "   export CATEGORIES=\"cs.CV,cs.AI,cs.RO,cs.CL\"          # 关注分类 / Categories of interest"
-    echo "   export MAX_PAPERS=\"10\"                              # Smoke test论文数量上限 / Smoke test paper limit"
+    echo "   export MAX_PAPERS=\"0\"                               # 论文数量上限，0表示不限制 / Paper limit, 0 means unlimited"
     echo "   export ARXIV_API_DELAY_SECONDS=\"8\"                  # arXiv API请求间隔 / arXiv API request interval"
     echo "   export ARXIV_API_NUM_RETRIES=\"5\"                    # arXiv API重试次数 / arXiv API retries"
     echo "   export INCLUDE_KEYWORDS=\"vla,robot foundation model,game agent,minecraft agent\"  # 强制保留关键词 / Strong include keywords"
@@ -59,8 +59,8 @@ else
     if [[ ",$CATEGORIES," == *",cs.GR,"* ]] || [[ ",$CATEGORIES," == *",cs.LG,"* ]]; then
         CATEGORIES="cs.CV,cs.AI,cs.RO,cs.CL"
     fi
-    export MAX_PAPERS="${MAX_PAPERS:-10}"
-    export MAX_CANDIDATE_PAPERS="${MAX_CANDIDATE_PAPERS:-40}"
+    export MAX_PAPERS="${MAX_PAPERS:-0}"
+    export MAX_CANDIDATE_PAPERS="${MAX_CANDIDATE_PAPERS:-0}"
     export ARXIV_API_DELAY_SECONDS="${ARXIV_API_DELAY_SECONDS:-8}"
     export ARXIV_API_NUM_RETRIES="${ARXIV_API_NUM_RETRIES:-1}"
     export CRAWL_TIMEOUT_SECONDS="${CRAWL_TIMEOUT_SECONDS:-600}"

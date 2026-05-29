@@ -13,7 +13,7 @@ import sys
 import os
 from datetime import datetime, timedelta
 
-DEFAULT_MAX_PAPERS = 10
+DEFAULT_MAX_PAPERS = 0
 
 def load_papers_data(file_path):
     """

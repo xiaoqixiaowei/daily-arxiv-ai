@@ -55,9 +55,9 @@ jobs:
           CATEGORIES="cs.CV,cs.AI,cs.RO,cs.CL"
         fi
         export MAX_PAPERS="${{ vars.MAX_PAPERS }}"
-        export MAX_PAPERS="${MAX_PAPERS:-10}"
+        export MAX_PAPERS="${MAX_PAPERS:-0}"
         export MAX_CANDIDATE_PAPERS="${{ vars.MAX_CANDIDATE_PAPERS }}"
-        export MAX_CANDIDATE_PAPERS="${MAX_CANDIDATE_PAPERS:-40}"
+        export MAX_CANDIDATE_PAPERS="${MAX_CANDIDATE_PAPERS:-0}"
         export ARXIV_API_DELAY_SECONDS="${{ vars.ARXIV_API_DELAY_SECONDS }}"
         export ARXIV_API_DELAY_SECONDS="${ARXIV_API_DELAY_SECONDS:-8}"
         export ARXIV_API_NUM_RETRIES="${{ vars.ARXIV_API_NUM_RETRIES }}"
@@ -95,7 +95,7 @@ jobs:
         
         cd daily_arxiv
         export MAX_PAPERS="${{ vars.MAX_PAPERS }}"
-        export MAX_PAPERS="${MAX_PAPERS:-10}"
+        export MAX_PAPERS="${MAX_PAPERS:-0}"
         # 执行去重检查脚本 / Execute intelligent deduplication check script
         set +e  # 暂时允许命令失败 / Temporarily allow command failure
         python daily_arxiv/check_stats.py
