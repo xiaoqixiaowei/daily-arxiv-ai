@@ -139,8 +139,11 @@ jobs:
         export OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
         export OPENAI_BASE_URL=${{ secrets.OPENAI_BASE_URL }}
         export LANGUAGE="${{ vars.LANGUAGE }}"
+        export LANGUAGE="${LANGUAGE:-Chinese}"
         export MODEL_NAME="${{ vars.MODEL_NAME }}"
+        export MODEL_NAME="${MODEL_NAME:-glm-5.1}"
         export LLM_REQUEST_INTERVAL_SECONDS="${{ vars.LLM_REQUEST_INTERVAL_SECONDS }}"
+        export LLM_REQUEST_INTERVAL_SECONDS="${LLM_REQUEST_INTERVAL_SECONDS:-6.5}"
         
         python enhance.py --data ../data/${today}.jsonl
         
@@ -160,6 +163,7 @@ jobs:
         
         # 设置环境变量 / Set environment variables
         export LANGUAGE="${{ vars.LANGUAGE }}"
+        export LANGUAGE="${LANGUAGE:-Chinese}"
         
         cd to_md
         
