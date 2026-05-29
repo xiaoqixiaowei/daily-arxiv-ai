@@ -827,26 +827,8 @@ async function loadPapersByDate(date) {
   
   try {
     const selectedLanguage = selectLanguageForDate(date);
-    // 从 data 分支获取数据文件
-    const dataUrl = DATA_CONFIG.getDataUrl(`data/${date}_AI_enhanced_${selectedLanguage}.jsonl`);
-    const response = await fetch(dataUrl);
-    // 如果文件不存在（例如返回 404），在论文展示区域提示没有论文
-    if (!response.ok) {
-      if (response.status === 404) {
-        container.innerHTML = `
-          <div class="loading-container">
-            <p>No papers found for this date.</p>
-          </div>
-        `;
-        paperData = {};
-        renderCategoryFilter({ sortedCategories: [], categoryCounts: {} });
-        return;
-      }
-      throw new Error(`HTTP ${response.status}`);
-    }
-    const text = await response.text();
-    // 空文件也提示没有论文
-    if (!text || text.trim() === '') {
+    const text = await fetchPaperJsonl(date, selectedLanguage);
+    if (!text) {
       container.innerHTML = `
         <div class="loading-container">
           <p>No papers found for this date.</p>
@@ -892,6 +874,31 @@ async function loadPapersByDate(date) {
       </div>
     `;
   }
+}
+
+async function fetchPaperJsonl(date, selectedLanguage) {
+  const enhancedUrl = DATA_CONFIG.getDataUrl(`data/${date}_AI_enhanced_${selectedLanguage}.jsonl`);
+  const rawUrl = DATA_CONFIG.getDataUrl(`data/${date}.jsonl`);
+
+  const enhancedResponse = await fetch(enhancedUrl);
+  if (enhancedResponse.ok) {
+    const enhancedText = await enhancedResponse.text();
+    if (enhancedText && enhancedText.trim() !== '') {
+      return enhancedText;
+    }
+  } else if (enhancedResponse.status !== 404) {
+    throw new Error(`HTTP ${enhancedResponse.status}`);
+  }
+
+  const rawResponse = await fetch(rawUrl);
+  if (!rawResponse.ok) {
+    if (rawResponse.status === 404) {
+      return '';
+    }
+    throw new Error(`HTTP ${rawResponse.status}`);
+  }
+
+  return rawResponse.text();
 }
 
 function parseJsonlData(jsonlText, date) {
@@ -1707,10 +1714,7 @@ async function loadPapersByDateRange(startDate, endDate) {
     
     for (const date of validDatesInRange) {
       const selectedLanguage = selectLanguageForDate(date);
-      // 从 data 分支获取数据文件
-      const dataUrl = DATA_CONFIG.getDataUrl(`data/${date}_AI_enhanced_${selectedLanguage}.jsonl`);
-      const response = await fetch(dataUrl);
-      const text = await response.text();
+      const text = await fetchPaperJsonl(date, selectedLanguage);
       const dataPapers = parseJsonlData(text, date);
       
       // 合并数据

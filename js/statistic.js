@@ -286,10 +286,7 @@ async function loadPapersByDateRange(startDate, endDate) {
     
     for (const date of validDatesInRange) {
       const selectedLanguage = selectLanguageForDate(date);
-      // 从 data 分支获取数据文件
-      const dataUrl = DATA_CONFIG.getDataUrl(`data/${date}_AI_enhanced_${selectedLanguage}.jsonl`);
-      const response = await fetch(dataUrl);
-      const text = await response.text();
+      const text = await fetchPaperJsonl(date, selectedLanguage);
       const dataPapers = parseJsonlData(text, date);
       
       // 合并数据
@@ -712,6 +709,31 @@ async function loadPapersByDateRange(startDate, endDate) {
       </div>
     `;
   }
+}
+
+async function fetchPaperJsonl(date, selectedLanguage) {
+  const enhancedUrl = DATA_CONFIG.getDataUrl(`data/${date}_AI_enhanced_${selectedLanguage}.jsonl`);
+  const rawUrl = DATA_CONFIG.getDataUrl(`data/${date}.jsonl`);
+
+  const enhancedResponse = await fetch(enhancedUrl);
+  if (enhancedResponse.ok) {
+    const enhancedText = await enhancedResponse.text();
+    if (enhancedText && enhancedText.trim() !== '') {
+      return enhancedText;
+    }
+  } else if (enhancedResponse.status !== 404) {
+    throw new Error(`HTTP ${enhancedResponse.status}`);
+  }
+
+  const rawResponse = await fetch(rawUrl);
+  if (!rawResponse.ok) {
+    if (rawResponse.status === 404) {
+      return '';
+    }
+    throw new Error(`HTTP ${rawResponse.status}`);
+  }
+
+  return rawResponse.text();
 }
 
 function parseJsonlData(jsonlText, date) {
