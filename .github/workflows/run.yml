@@ -17,7 +17,7 @@ permissions:
 
 concurrency:
   group: arxiv-daily-ai-enhanced
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 
 jobs:
