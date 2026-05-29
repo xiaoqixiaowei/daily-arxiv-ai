@@ -214,15 +214,6 @@ def build_fallback_ai(item: Dict, language: str) -> Dict:
     )
     conclusion = sentences[-1] if sentences else first_two
 
-    if language.lower().startswith("chinese"):
-        return {
-            "tldr": f"原始摘要预览：{first_two}",
-            "motivation": f"研究动机：{motivation}",
-            "method": f"方法概览：{method}",
-            "result": f"主要结果：{result}",
-            "conclusion": f"结论：{conclusion}"
-        }
-
     return {
         "tldr": f"Raw abstract preview: {first_two}",
         "motivation": f"Motivation: {motivation}",
