@@ -16,7 +16,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: arxiv-daily-ai-enhanced
+  group: ${{ github.event_name == 'push' && format('arxiv-daily-ai-enhanced-smoke-{0}', github.run_id) || 'arxiv-daily-ai-enhanced' }}
   cancel-in-progress: true
 
 
