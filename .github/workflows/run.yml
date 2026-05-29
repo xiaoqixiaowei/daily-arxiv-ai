@@ -56,10 +56,14 @@ jobs:
         fi
         export MAX_PAPERS="${{ vars.MAX_PAPERS }}"
         export MAX_PAPERS="${MAX_PAPERS:-10}"
+        export MAX_CANDIDATE_PAPERS="${{ vars.MAX_CANDIDATE_PAPERS }}"
+        export MAX_CANDIDATE_PAPERS="${MAX_CANDIDATE_PAPERS:-40}"
         export ARXIV_API_DELAY_SECONDS="${{ vars.ARXIV_API_DELAY_SECONDS }}"
         export ARXIV_API_DELAY_SECONDS="${ARXIV_API_DELAY_SECONDS:-8}"
         export ARXIV_API_NUM_RETRIES="${{ vars.ARXIV_API_NUM_RETRIES }}"
-        export ARXIV_API_NUM_RETRIES="${ARXIV_API_NUM_RETRIES:-5}"
+        export ARXIV_API_NUM_RETRIES="${ARXIV_API_NUM_RETRIES:-1}"
+        export CRAWL_TIMEOUT_SECONDS="${{ vars.CRAWL_TIMEOUT_SECONDS }}"
+        export CRAWL_TIMEOUT_SECONDS="${CRAWL_TIMEOUT_SECONDS:-600}"
         DEFAULT_INCLUDE_KEYWORDS="vision-language-action,vision language action,vla,robot foundation model,robotic foundation model,embodied agent,embodied agents,game agent,game agents,minecraft agent,minecraft agents"
         DEPRECATED_GAME_KEYWORDS="game agent,game agents,gaming agent,game ai,game-playing,game playing,minecraft,videogame,video game,video games,game environment,game environments,game benchmark,game benchmarks"
         DEPRECATED_EXTENDED_GAME_KEYWORDS="game agent,game agents,gaming agent,game ai,game-playing,game playing,minecraft,videogame,video game,video games,game environment,game environments,game benchmark,game benchmarks,gameplay,game engine,game engines,in-game,cross-game,super mario,card games,role-playing game,video role-playing,rpg generation,endless runner game"
@@ -72,7 +76,7 @@ jobs:
         
         # 使用Scrapy爬取
         # Use Scrapy to crawl
-        scrapy crawl arxiv -o ../data/${today}.jsonl
+        scrapy crawl arxiv -s CLOSESPIDER_TIMEOUT=${CRAWL_TIMEOUT_SECONDS} -o ../data/${today}.jsonl
         
         # 检查爬取是否成功 / Check if crawling was successful
         if [ ! -f "../data/${today}.jsonl" ]; then

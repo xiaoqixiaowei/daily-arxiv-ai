@@ -264,15 +264,22 @@ NEGATIVE_TERMS = [
 ]
 
 DEFAULT_MAX_PAPERS = 10
+DEFAULT_MAX_CANDIDATE_PAPERS = 40
 DEFAULT_ARXIV_API_DELAY_SECONDS = 8.0
-DEFAULT_ARXIV_API_NUM_RETRIES = 5
+DEFAULT_ARXIV_API_NUM_RETRIES = 1
 
 
 class DailyArxivPipeline:
     def __init__(self):
         self.page_size = 1
         self.max_papers = get_int_env("MAX_PAPERS", DEFAULT_MAX_PAPERS)
+        self.max_candidate_papers = get_int_env(
+            "MAX_CANDIDATE_PAPERS",
+            DEFAULT_MAX_CANDIDATE_PAPERS,
+        )
         self.kept_count = 0
+        self.seen_ids = set()
+        self.candidate_count = 0
         self.client = arxiv.Client(
             page_size=self.page_size,
             delay_seconds=get_float_env(
@@ -295,6 +302,22 @@ class DailyArxivPipeline:
         self.include_keywords = self.include_keywords or DEFAULT_INCLUDE_KEYWORDS
 
     def process_item(self, item: dict, spider):
+        if item["id"] in self.seen_ids:
+            spider.logger.info("dropped: duplicate_id %s", item["id"])
+            raise DropItem(f"Skipped {item['id']}: duplicate_id")
+        self.seen_ids.add(item["id"])
+        self.candidate_count += 1
+
+        if (
+            self.max_candidate_papers > 0
+            and self.candidate_count > self.max_candidate_papers
+        ):
+            self.close_for_max_candidates(spider)
+            raise DropItem(
+                f"Skipped {item['id']}: "
+                f"max_candidate_papers_reached({self.max_candidate_papers})"
+            )
+
         if self.max_papers > 0 and self.kept_count >= self.max_papers:
             self.close_for_max_papers(spider)
             raise DropItem(f"Skipped {item['id']}: max_papers_reached({self.max_papers})")
@@ -337,6 +360,17 @@ class DailyArxivPipeline:
         spider.crawler.engine.close_spider(
             spider,
             reason=f"max_papers_{self.max_papers}",
+        )
+
+    def close_for_max_candidates(self, spider):
+        spider.logger.info(
+            "max_candidate_papers reached: closing spider after %s candidates and %s kept papers",
+            self.candidate_count,
+            self.kept_count,
+        )
+        spider.crawler.engine.close_spider(
+            spider,
+            reason=f"max_candidate_papers_{self.max_candidate_papers}",
         )
 
     def matches_include_keywords(self, item: dict) -> bool:

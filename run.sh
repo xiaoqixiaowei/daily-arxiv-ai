@@ -60,8 +60,10 @@ else
         CATEGORIES="cs.CV,cs.AI,cs.RO,cs.CL"
     fi
     export MAX_PAPERS="${MAX_PAPERS:-10}"
+    export MAX_CANDIDATE_PAPERS="${MAX_CANDIDATE_PAPERS:-40}"
     export ARXIV_API_DELAY_SECONDS="${ARXIV_API_DELAY_SECONDS:-8}"
-    export ARXIV_API_NUM_RETRIES="${ARXIV_API_NUM_RETRIES:-5}"
+    export ARXIV_API_NUM_RETRIES="${ARXIV_API_NUM_RETRIES:-1}"
+    export CRAWL_TIMEOUT_SECONDS="${CRAWL_TIMEOUT_SECONDS:-600}"
     DEFAULT_INCLUDE_KEYWORDS="vision-language-action,vision language action,vla,robot foundation model,robotic foundation model,embodied agent,embodied agents,game agent,game agents,minecraft agent,minecraft agents"
     export INCLUDE_KEYWORDS="${INCLUDE_KEYWORDS:-$DEFAULT_INCLUDE_KEYWORDS}"
     export MODEL_NAME="${MODEL_NAME:-glm-5.1}"
@@ -72,8 +74,10 @@ else
     echo "   LANGUAGE: $LANGUAGE"
     echo "   CATEGORIES: $CATEGORIES"
     echo "   MAX_PAPERS: $MAX_PAPERS"
+    echo "   MAX_CANDIDATE_PAPERS: $MAX_CANDIDATE_PAPERS"
     echo "   ARXIV_API_DELAY_SECONDS: $ARXIV_API_DELAY_SECONDS"
     echo "   ARXIV_API_NUM_RETRIES: $ARXIV_API_NUM_RETRIES"
+    echo "   CRAWL_TIMEOUT_SECONDS: $CRAWL_TIMEOUT_SECONDS"
     echo "   INCLUDE_KEYWORDS: $INCLUDE_KEYWORDS"
     echo "   MODEL_NAME: $MODEL_NAME"
     echo "   OPENAI_BASE_URL: $OPENAI_BASE_URL"
@@ -101,7 +105,7 @@ else
 fi
 
 cd daily_arxiv
-scrapy crawl arxiv -o ../data/${today}.jsonl
+scrapy crawl arxiv -s CLOSESPIDER_TIMEOUT=${CRAWL_TIMEOUT_SECONDS} -o ../data/${today}.jsonl
 
 if [ ! -f "../data/${today}.jsonl" ]; then
     echo "爬取失败，未生成数据文件 / Crawling failed, no data file generated"
