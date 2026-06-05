@@ -322,8 +322,30 @@ class DailyArxivPipeline:
             self.close_for_max_papers(spider)
             raise DropItem(f"Skipped {item['id']}: max_papers_reached({self.max_papers})")
 
-        item["pdf"] = f"https://arxiv.org/pdf/{item['id']}"
-        item["abs"] = f"https://arxiv.org/abs/{item['id']}"
+        item.setdefault("pdf", f"https://arxiv.org/pdf/{item['id']}")
+        item.setdefault("abs", f"https://arxiv.org/abs/{item['id']}")
+        if self.needs_api_metadata(item):
+            self.populate_from_arxiv_api(item, spider)
+
+        matched, reason = self.get_match_reason(item)
+        if not matched:
+            spider.logger.info("dropped: %s %s", reason, item["id"])
+            raise DropItem(f"Skipped {item['id']}: {reason}")
+        spider.logger.info("kept: %s %s", reason, item["id"])
+        self.kept_count += 1
+        if self.max_papers > 0 and self.kept_count >= self.max_papers:
+            self.close_for_max_papers(spider)
+        return item
+
+    def needs_api_metadata(self, item: dict) -> bool:
+        return not (
+            item.get("title")
+            and item.get("summary")
+            and item.get("authors")
+            and item.get("categories")
+        )
+
+    def populate_from_arxiv_api(self, item: dict, spider):
         search = arxiv.Search(
             id_list=[item["id"]],
             max_results=1,
@@ -342,15 +364,6 @@ class DailyArxivPipeline:
         item["categories"] = paper.categories
         item["comment"] = paper.comment
         item["summary"] = paper.summary
-        matched, reason = self.get_match_reason(item)
-        if not matched:
-            spider.logger.info("dropped: %s %s", reason, item["id"])
-            raise DropItem(f"Skipped {item['id']}: {reason}")
-        spider.logger.info("kept: %s %s", reason, item["id"])
-        self.kept_count += 1
-        if self.max_papers > 0 and self.kept_count >= self.max_papers:
-            self.close_for_max_papers(spider)
-        return item
 
     def close_for_max_papers(self, spider):
         spider.logger.info(

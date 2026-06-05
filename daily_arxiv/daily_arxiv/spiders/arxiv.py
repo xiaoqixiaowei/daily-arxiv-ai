@@ -55,10 +55,7 @@ class ArxivSpider(scrapy.Spider):
                 continue
             
             # 提取论文分类信息 - 在subjects部分
-            subjects_text = paper_dd.css(".list-subjects .primary-subject::text").get()
-            if not subjects_text:
-                # 如果找不到主分类，尝试其他方式获取分类
-                subjects_text = paper_dd.css(".list-subjects::text").get()
+            subjects_text = " ".join(paper_dd.css(".list-subjects ::text").getall())
             
             if subjects_text:
                 # 解析分类信息，通常格式如 "Computer Vision and Pattern Recognition (cs.CV)"
@@ -71,6 +68,12 @@ class ArxivSpider(scrapy.Spider):
                     yield {
                         "id": arxiv_id,
                         "categories": list(paper_categories),  # 添加分类信息用于调试
+                        "pdf": f"https://arxiv.org/pdf/{arxiv_id}",
+                        "abs": f"https://arxiv.org/abs/{arxiv_id}",
+                        "authors": extract_authors(paper_dd),
+                        "title": extract_title(paper_dd),
+                        "comment": extract_comment(paper_dd),
+                        "summary": extract_summary(paper_dd),
                     }
                     self.logger.info(f"Found paper {arxiv_id} with categories {paper_categories}")
                 else:
@@ -81,6 +84,12 @@ class ArxivSpider(scrapy.Spider):
                 yield {
                     "id": arxiv_id,
                     "categories": [],
+                    "pdf": f"https://arxiv.org/pdf/{arxiv_id}",
+                    "abs": f"https://arxiv.org/abs/{arxiv_id}",
+                    "authors": extract_authors(paper_dd),
+                    "title": extract_title(paper_dd),
+                    "comment": extract_comment(paper_dd),
+                    "summary": extract_summary(paper_dd),
                 }
 
 
@@ -99,3 +108,42 @@ def normalize_categories(raw_categories: str | None) -> str:
     ):
         return DEFAULT_CATEGORIES
     return normalized or DEFAULT_CATEGORIES
+
+
+def extract_title(paper_dd) -> str:
+    text = " ".join(paper_dd.css(".list-title ::text").getall())
+    return clean_descriptor_text(text, "Title:")
+
+
+def extract_authors(paper_dd) -> list[str]:
+    return [
+        normalize_space(author)
+        for author in paper_dd.css(".list-authors a::text").getall()
+        if normalize_space(author)
+    ]
+
+
+def extract_comment(paper_dd) -> str | None:
+    text = " ".join(paper_dd.css(".list-comments ::text").getall())
+    comment = clean_descriptor_text(text, "Comments:")
+    return comment or None
+
+
+def extract_summary(paper_dd) -> str:
+    paragraphs = []
+    for paragraph in paper_dd.css("p.mathjax"):
+        text = normalize_space(" ".join(paragraph.css("::text").getall()))
+        if text:
+            paragraphs.append(text)
+    return "\n  ".join(paragraphs)
+
+
+def clean_descriptor_text(text: str, descriptor: str) -> str:
+    text = normalize_space(text)
+    if text.startswith(descriptor):
+        text = text[len(descriptor):]
+    return normalize_space(text)
+
+
+def normalize_space(text: str) -> str:
+    return re.sub(r"\s+", " ", text or "").strip()
