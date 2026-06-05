@@ -24,6 +24,14 @@ DEFAULT_INCLUDE_KEYWORDS = [
     "game agents",
     "minecraft agent",
     "minecraft agents",
+    "gui agent",
+    "gui agents",
+    "ui agent",
+    "ui agents",
+    "computer use agent",
+    "computer-use agent",
+    "web agent",
+    "web agents",
 ]
 
 DEPRECATED_INCLUDE_KEYWORD_SETS = {
@@ -110,7 +118,14 @@ ROBOTICS_TERMS = [
     "robotic",
     "robotics",
     "embodied",
-    "manipulation",
+    "robot manipulation",
+    "robotic manipulation",
+    "object manipulation",
+    "dexterous manipulation",
+    "manipulation task",
+    "manipulation tasks",
+    "manipulation policy",
+    "manipulation policies",
     "manipulator",
     "navigation",
     "locomotion",
@@ -147,7 +162,14 @@ STRONG_ROBOTICS_TERMS = [
     "robotic",
     "robotics",
     "embodied",
-    "manipulation",
+    "robot manipulation",
+    "robotic manipulation",
+    "object manipulation",
+    "dexterous manipulation",
+    "manipulation task",
+    "manipulation tasks",
+    "manipulation policy",
+    "manipulation policies",
     "manipulator",
     "navigation",
     "locomotion",
@@ -193,6 +215,46 @@ GAME_TERMS = [
     "game ai",
     "game engine",
     "game engines",
+]
+
+GUI_AGENT_TERMS = [
+    "gui agent",
+    "gui agents",
+    "ui agent",
+    "ui agents",
+    "computer use agent",
+    "computer use agents",
+    "computer-use agent",
+    "computer-use agents",
+    "computer control agent",
+    "computer control agents",
+    "web agent",
+    "web agents",
+    "browser agent",
+    "browser agents",
+    "mobile agent",
+    "mobile agents",
+    "mobile gui",
+    "graphical user interface",
+    "graphical user interfaces",
+    "user interface agent",
+    "user interface agents",
+    "app agent",
+    "app agents",
+    "android agent",
+    "android agents",
+    "desktop agent",
+    "desktop agents",
+    "os agent",
+    "os agents",
+    "computer-use benchmark",
+    "computer use benchmark",
+    "web navigation",
+    "browser navigation",
+    "screen understanding",
+    "screen-grounded",
+    "screen grounded",
+    "visual gui",
 ]
 
 EXCLUDED_APPLICATION_TERMS = [
@@ -261,6 +323,19 @@ NEGATIVE_TERMS = [
     "video benchmark for complex perception",
     "garment deformation",
     "xr prototyping",
+    "manipulative behavior",
+    "manipulative behaviours",
+    "manipulative behaviour",
+    "behavior manipulation",
+    "behaviour manipulation",
+    "social manipulation",
+    "psychological manipulation",
+    "persuasion",
+    "deception",
+    "deceptive",
+    "toxicity",
+    "companion safety",
+    "ai companion safety",
 ]
 
 DEFAULT_MAX_PAPERS = 0
@@ -406,6 +481,7 @@ class DailyArxivPipeline:
         robotics_hits = find_terms(haystack, ROBOTICS_TERMS)
         strong_robotics_hits = find_terms(haystack, STRONG_ROBOTICS_TERMS)
         game_hits = find_terms(haystack, GAME_TERMS)
+        gui_hits = find_terms(haystack, GUI_AGENT_TERMS)
         if forced_hits:
             return True, f"strong_include({forced_hits[0]})"
 
@@ -414,11 +490,14 @@ class DailyArxivPipeline:
             return False, "missing_model_term"
 
         application_hits = find_terms(haystack, EXCLUDED_APPLICATION_TERMS)
-        if application_hits and not (strong_robotics_hits or game_hits):
+        if application_hits and not (strong_robotics_hits or game_hits or gui_hits):
             return False, f"generic_vlm_application({application_hits[0]})"
 
         if game_hits:
             return True, f"llm/vlm+game({game_hits[0]})"
+
+        if gui_hits:
+            return True, f"llm/vlm+gui({gui_hits[0]})"
 
         if robotics_hits:
             return True, f"vlm+robotics({robotics_hits[0]})"
