@@ -1184,7 +1184,8 @@ function renderPapers() {
         a.motivation || '',
         a.method || '',
         a.result || '',
-        a.conclusion || ''
+        a.conclusion || '',
+        a.primaryAffiliation || ''
       ].join(' ').toLowerCase();
       const hayB = [
         b.title,
@@ -1195,7 +1196,8 @@ function renderPapers() {
         b.motivation || '',
         b.method || '',
         b.result || '',
-        b.conclusion || ''
+        b.conclusion || '',
+        b.primaryAffiliation || ''
       ].join(' ').toLowerCase();
       const am = hayA.includes(q);
       const bm = hayB.includes(q);
@@ -1215,7 +1217,8 @@ function renderPapers() {
         p.motivation || '',
         p.method || '',
         p.result || '',
-        p.conclusion || ''
+        p.conclusion || '',
+        p.primaryAffiliation || ''
       ].join(' ').toLowerCase();
       const matched = hay.includes(q);
       p.isMatched = matched;
@@ -1422,6 +1425,9 @@ function renderPapers() {
     const highlightedSummary = titleSummaryTerms.length > 0 
       ? highlightMatches(paper.summary, titleSummaryTerms, 'keyword-highlight') 
       : paper.summary;
+    const highlightedPrimaryAffiliation = paper.primaryAffiliation && titleSummaryTerms.length > 0
+      ? highlightMatches(paper.primaryAffiliation, titleSummaryTerms, 'keyword-highlight')
+      : paper.primaryAffiliation;
 
     // 高亮作者（作者过滤 + 文本搜索）
     const authorTerms = [];
@@ -1454,6 +1460,7 @@ function renderPapers() {
       <div class="paper-card-header">
         <h3 class="paper-card-title">${highlightedTitle}</h3>
         <p class="paper-card-authors">${formattedAuthors}</p>
+        ${paper.primaryAffiliation ? `<p class="paper-card-affiliation"><span class="affiliation-label">第一机构</span>${highlightedPrimaryAffiliation}</p>` : ''}
         <div class="paper-card-categories">
           ${categoryTags}
         </div>
@@ -1553,7 +1560,7 @@ function showPaperDetails(paper, paperIndex) {
   const modalContent = `
     <div class="paper-details ${matchedPaperClass}">
       <p><strong>Authors: </strong>${highlightedAuthors}</p>
-      ${paper.primaryAffiliation ? `<p><strong>First affiliation: </strong>${paper.primaryAffiliation}</p>` : ''}
+      ${paper.primaryAffiliation ? `<p><strong>第一机构: </strong>${paper.primaryAffiliation}</p>` : ''}
       <p><strong>Categories: </strong>${categoryDisplay}</p>
       <p><strong>Date: </strong>${formatDate(paper.date)}</p>
       

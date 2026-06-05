@@ -666,6 +666,27 @@ main {
   user-select: none;
 }
 
+.paper-card-affiliation {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+.affiliation-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--primary-color);
+  background-color: rgba(102, 126, 234, 0.08);
+  border: 1px solid rgba(102, 126, 234, 0.18);
+  border-radius: 6px;
+  padding: 2px 6px;
+}
+
 .paper-card-categories {
   display: flex;
   flex-wrap: wrap;

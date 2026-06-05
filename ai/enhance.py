@@ -36,7 +36,7 @@ Return only one valid JSON object with exactly these string fields:
   "primary_affiliation": "..."
 }}
 Do not wrap the JSON in Markdown fences. Do not add any text before or after the JSON.
-For "primary_affiliation", infer the first author's institution if possible. Use a Chinese short name, such as "斯坦福", "MIT", "清华", "上交", "港大"; if it is hard to translate, keep the English short name. If unknown, return an empty string.
+For "primary_affiliation", infer the first author's institution from the title, author list, abstract, and your general knowledge if possible. Use a short display name, preferably Chinese for well-known universities or companies, such as "斯坦福", "MIT", "清华", "上交", "港大", "CMU", "Google DeepMind". If there is not enough evidence, return an empty string. Never invent a full affiliation sentence.
 """
 
 REQUIRED_AI_FIELDS = ["tldr", "motivation", "method", "result", "conclusion", "primary_affiliation"]
@@ -123,8 +123,18 @@ def process_single_item(chain, item: Dict, language: str, rate_lock: Lock, rate_
             item['AI'] = default_ai_fields
         else:
             wait_for_llm_slot(rate_lock, rate_state, request_interval)
+            authors = item.get("authors") or []
+            if isinstance(authors, list):
+                authors_text = ", ".join(authors)
+                first_author = authors[0] if authors else ""
+            else:
+                authors_text = str(authors)
+                first_author = authors_text.split(",")[0].strip()
             response = chain.invoke({
                 "language": language,
+                "title": item.get("title", ""),
+                "authors": authors_text,
+                "first_author": first_author,
                 "content": item['summary']
             })
             content = response.content if hasattr(response, "content") else str(response)
@@ -138,8 +148,23 @@ def process_single_item(chain, item: Dict, language: str, rate_lock: Lock, rate_
     for field in REQUIRED_AI_FIELDS:
         if field not in item['AI']:
             item['AI'][field] = default_ai_fields[field]
+    item['AI']['primary_affiliation'] = clean_primary_affiliation(
+        item['AI'].get('primary_affiliation', '')
+    )
 
     return item
+
+def clean_primary_affiliation(value: str) -> str:
+    """Keep affiliation labels short enough for cards and Markdown."""
+    if not value:
+        return ""
+    value = re.sub(r"\s+", " ", str(value)).strip()
+    if value.lower() in {"unknown", "unknown.", "n/a", "none", "not provided"}:
+        return ""
+    value = re.sub(r"^(first affiliation|primary affiliation|affiliation)\s*[:：]\s*", "", value, flags=re.IGNORECASE)
+    if len(value) > 80:
+        value = value[:77].rstrip() + "..."
+    return value
 
 def split_sentences(text: str) -> List[str]:
     """Split English/Chinese abstract text into compact sentence chunks."""

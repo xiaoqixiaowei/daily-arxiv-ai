@@ -57,7 +57,7 @@ if __name__ == "__main__":
                     template.format(
                         title=item["title"],
                         authors=",".join(item["authors"]),
-                        primary_affiliation_line=f"First affiliation: {primary_affiliation}" if primary_affiliation else "",
+                        primary_affiliation_line=f"第一机构: {primary_affiliation}" if primary_affiliation else "",
                         summary=item["summary"],
                         url=item['abs'],
                         tldr=ai_data.get('tldr', ''),

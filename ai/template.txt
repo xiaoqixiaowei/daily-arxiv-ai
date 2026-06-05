@@ -1,4 +1,13 @@
-Please analyze the following abstract of papers. 
+Please analyze the following paper metadata and abstract.
+
+Title:
+{title}
+
+Authors:
+{authors}
+
+First author:
+{first_author}
 
 Content:
 {content}
